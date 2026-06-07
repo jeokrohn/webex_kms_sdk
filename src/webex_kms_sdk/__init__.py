@@ -22,6 +22,7 @@ from .errors import (
 )
 from .mercury import MercuryClient
 from .models import JWK, Activity, ConversationObject, Device, Key, KMSMessage, MercuryEvent
+from .threaded import ThreadedWebexClient
 
 log = logging.getLogger(__name__)
 
@@ -49,5 +50,6 @@ __all__ = [
     "PreconditionRequiredError",
     "RateLimitError",
     "ServerError",
+    "ThreadedWebexClient",
     "WebexClient",
 ]
