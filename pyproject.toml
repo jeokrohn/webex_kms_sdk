@@ -4,8 +4,20 @@ version = "0.1.0"
 description = "Async Python SDK slice for Webex Mercury communication and KMS-backed decryption"
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "MPL-2.0" }
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [{ name = "Webex KMS SDK Contributors" }]
+keywords = ["webex", "kms", "mercury", "encryption", "e2ee"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Framework :: AsyncIO",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Typing :: Typed",
+]
 dependencies = [
   "cryptography>=42.0.0",
   "httpx>=0.27.0",
@@ -22,6 +34,7 @@ dev = [
   "python-dotenv>=1.2.2",
   "respx>=0.21.0",
   "ruff>=0.8.0",
+  "twine>=6.1.0",
 ]
 
 [build-system]
@@ -30,6 +43,16 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/webex_kms_sdk"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/LICENSE",
+  "/README.md",
+  "/docs",
+  "/examples",
+  "/src",
+  "/tests",
+]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
