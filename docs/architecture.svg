@@ -1,0 +1,170 @@
+<svg width="1280" height="1280" viewBox="0 0 1280 1280" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Webex KMS SDK architecture and class ownership</title>
+  <desc id="desc">Architecture diagram showing the ThreadedWebexClient sync facade, async WebexClient composition, external Webex services, and KMS key retrieval completion paths.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#395166" />
+    </marker>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#203040" flood-opacity="0.16" />
+    </filter>
+  </defs>
+  <style>
+    .page { fill: #f5f7fb; }
+    .title { fill: #172331; font: 700 30px Arial, Helvetica, sans-serif; }
+    .subtitle { fill: #506172; font: 16px Arial, Helvetica, sans-serif; }
+    .section { fill: #ffffff; stroke: #d4dde7; stroke-width: 1.5; filter: url(#shadow); }
+    .section-title { fill: #223244; font: 700 15px Arial, Helvetica, sans-serif; }
+    .box { fill: #ffffff; stroke: #7d91a6; stroke-width: 1.5; }
+    .sync { fill: #eaf2ff; stroke: #4c79b8; }
+    .async { fill: #eef8f0; stroke: #4d9362; }
+    .client { fill: #fff7e9; stroke: #b78036; }
+    .external { fill: #f1eefb; stroke: #7764af; }
+    .flow { fill: #ecf7f7; stroke: #43818a; }
+    .label { fill: #1f2d3b; font: 700 14px Arial, Helvetica, sans-serif; }
+    .text { fill: #3d4d5f; font: 12.5px Arial, Helvetica, sans-serif; }
+    .small { fill: #536679; font: 11.5px Arial, Helvetica, sans-serif; }
+    .code { fill: #24384b; font: 12px Menlo, Consolas, monospace; }
+    .code-small { fill: #24384b; font: 10.5px Menlo, Consolas, monospace; }
+    .arrow { stroke: #395166; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+    .thin { stroke: #7990a4; stroke-width: 1.4; fill: none; marker-end: url(#arrow); }
+    .line { stroke: #aab8c7; stroke-width: 1.3; fill: none; }
+  </style>
+
+  <rect class="page" x="0" y="0" width="1280" height="1280" />
+  <text class="title" x="48" y="48">Webex KMS SDK architecture</text>
+  <text class="subtitle" x="48" y="76">Async core, optional thread-backed synchronous facade, and KMS response correlation.</text>
+
+  <rect class="section" x="36" y="104" width="1210" height="280" rx="8" />
+  <text class="section-title" x="60" y="133">Entry points and owned clients</text>
+
+  <rect class="box sync" x="60" y="160" width="220" height="84" rx="8" />
+  <text class="label" x="80" y="188">Synchronous script</text>
+  <text class="code" x="80" y="211">client.get_key(uri)</text>
+  <text class="small" x="80" y="232">Blocks caller until key is ready</text>
+
+  <rect class="box async" x="60" y="270" width="220" height="96" rx="8" />
+  <text class="label" x="80" y="298">Async application</text>
+  <text class="code" x="80" y="320">await client.encryption</text>
+  <text class="code" x="80" y="337">.get_key(uri)</text>
+  <text class="small" x="80" y="356">Uses caller's event loop</text>
+
+  <rect class="box sync" x="330" y="150" width="260" height="104" rx="8" />
+  <text class="label" x="350" y="178">ThreadedWebexClient</text>
+  <text class="text" x="350" y="202">Sync facade and context manager</text>
+  <text class="code" x="350" y="224">run_coroutine_threadsafe(...)</text>
+  <text class="small" x="350" y="243">Does not expose async internals</text>
+
+  <rect class="box sync" x="330" y="276" width="260" height="78" rx="8" />
+  <text class="label" x="350" y="303">Background thread</text>
+  <text class="text" x="350" y="326">Owns private asyncio event loop</text>
+  <text class="small" x="350" y="345">Creates WebexClient inside the loop</text>
+
+  <rect class="box client" x="640" y="150" width="300" height="204" rx="8" />
+  <text class="label" x="664" y="178">WebexClient</text>
+  <text class="text" x="664" y="201">Top-level async SDK client</text>
+  <text class="small" x="664" y="221">Lazily creates and shares subclients</text>
+  <rect class="box" x="664" y="242" width="116" height="34" rx="6" />
+  <text class="code-small" x="676" y="264">CoreHTTPClient</text>
+  <rect class="box" x="802" y="242" width="116" height="34" rx="6" />
+  <text class="code-small" x="822" y="264">DeviceClient</text>
+  <rect class="box" x="664" y="292" width="116" height="34" rx="6" />
+  <text class="code-small" x="684" y="314">MercuryClient</text>
+  <rect class="box" x="802" y="292" width="116" height="34" rx="6" />
+  <text class="code-small" x="810" y="314">EncryptionClient</text>
+  <text class="small" x="664" y="342">ConversationClient wires Mercury + Encryption</text>
+
+  <rect class="box external" x="1000" y="130" width="210" height="228" rx="8" />
+  <text class="label" x="1020" y="158">External services</text>
+  <text class="code" x="1020" y="186">WDM REST</text>
+  <text class="small" x="1020" y="205">device registration</text>
+  <text class="code" x="1020" y="235">Webex REST</text>
+  <text class="small" x="1020" y="254">people/me fallback</text>
+  <text class="code" x="1020" y="284">KMS REST</text>
+  <text class="small" x="1020" y="303">ECDH + retrieve messages</text>
+  <text class="code" x="1020" y="333">Mercury WebSocket</text>
+  <text class="small" x="1020" y="352">async KMS responses + events</text>
+
+  <path class="arrow" d="M 280 202 L 330 202" />
+  <path class="arrow" d="M 460 254 L 460 276" />
+  <path class="arrow" d="M 590 315 L 640 252" />
+  <path class="arrow" d="M 280 318 L 300 374 L 610 374 L 610 214 L 640 214" />
+  <path class="thin" d="M 940 258 L 1000 188" />
+  <path class="thin" d="M 940 270 L 1000 235" />
+  <path class="thin" d="M 940 296 L 1000 284" />
+  <path class="thin" d="M 940 320 L 1000 333" />
+
+  <rect class="section" x="36" y="414" width="1210" height="168" rx="8" />
+  <text class="section-title" x="60" y="443">Class ownership hierarchy</text>
+
+  <path class="arrow" d="M 280 502 L 348 502" />
+  <path class="line" d="M 528 502 L 560 502" />
+  <path class="line" d="M 560 454 L 1003 454" />
+  <path class="line" d="M 560 502 L 560 454" />
+  <path class="line" d="M 667 454 L 667 462" />
+  <path class="line" d="M 835 454 L 835 462" />
+  <path class="line" d="M 1003 454 L 1003 462" />
+  <path class="line" d="M 560 578 L 835 578" />
+  <path class="line" d="M 560 502 L 560 578" />
+  <path class="line" d="M 667 578 L 667 570" />
+  <path class="line" d="M 835 578 L 835 570" />
+
+  <rect class="box sync" x="80" y="474" width="200" height="56" rx="8" />
+  <text class="label" x="104" y="498">ThreadedWebexClient</text>
+  <text class="small" x="104" y="518">optional sync facade</text>
+
+  <rect class="box client" x="348" y="474" width="180" height="56" rx="8" />
+  <text class="label" x="386" y="498">WebexClient</text>
+  <text class="small" x="382" y="518">async owner</text>
+
+  <rect class="box" x="592" y="462" width="150" height="44" rx="6" />
+  <text class="code-small" x="614" y="489">CoreHTTPClient</text>
+  <rect class="box" x="760" y="462" width="150" height="44" rx="6" />
+  <text class="code-small" x="790" y="489">DeviceClient</text>
+  <rect class="box" x="928" y="462" width="150" height="44" rx="6" />
+  <text class="code-small" x="957" y="489">MercuryClient</text>
+  <rect class="box" x="592" y="526" width="150" height="44" rx="6" />
+  <text class="code-small" x="613" y="553">EncryptionClient</text>
+  <rect class="box" x="760" y="526" width="150" height="44" rx="6" />
+  <text class="code-small" x="779" y="553">ConversationClient</text>
+  <text class="small" x="932" y="542">ConversationClient subscribes</text>
+  <text class="small" x="932" y="559">to Mercury and decrypts via KMS</text>
+
+  <rect class="section" x="36" y="612" width="1210" height="240" rx="8" />
+  <text class="section-title" x="60" y="641">KMS key retrieval flow</text>
+
+  <rect class="box flow" x="72" y="674" width="184" height="72" rx="8" />
+  <text class="label" x="94" y="700">1. Request key</text>
+  <text class="code" x="94" y="724">get_key(key_uri)</text>
+
+  <rect class="box flow" x="300" y="674" width="196" height="72" rx="8" />
+  <text class="label" x="322" y="700">2. Send KMS JWE</text>
+  <text class="small" x="322" y="722">ECDH-wrapped retrieve</text>
+  <text class="small" x="322" y="740">over KMS REST</text>
+
+  <rect class="box flow" x="540" y="650" width="210" height="64" rx="8" />
+  <text class="label" x="562" y="676">3a. HTTP 200 path</text>
+  <text class="small" x="562" y="697">response JWE parsed immediately</text>
+
+  <rect class="box flow" x="540" y="744" width="210" height="64" rx="8" />
+  <text class="label" x="562" y="770">3b. HTTP 202 path</text>
+  <text class="small" x="562" y="791">pending Future waits by requestId</text>
+
+  <rect class="box flow" x="798" y="744" width="198" height="64" rx="8" />
+  <text class="label" x="820" y="770">4. Mercury response</text>
+  <text class="small" x="820" y="791">process_kms_messages()</text>
+
+  <rect class="box flow" x="1044" y="674" width="150" height="72" rx="8" />
+  <text class="label" x="1076" y="700">5. Key</text>
+  <text class="small" x="1076" y="722">cache + return</text>
+  <text class="code" x="1076" y="740">Key</text>
+
+  <path class="arrow" d="M 256 710 L 300 710" />
+  <path class="arrow" d="M 496 710 L 540 682" />
+  <path class="arrow" d="M 496 710 L 540 776" />
+  <path class="arrow" d="M 750 682 L 1044 704" />
+  <path class="arrow" d="M 750 776 L 798 776" />
+  <path class="arrow" d="M 996 776 L 1044 724" />
+
+  <text class="small" x="72" y="836">Synchronous callers block in ThreadedWebexClient; async callers await the same EncryptionClient coroutine.</text>
+</svg>

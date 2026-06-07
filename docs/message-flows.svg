@@ -1,0 +1,208 @@
+<svg width="1280" height="1500" viewBox="0 0 1280 1500" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Webex KMS SDK REST and websocket message flows</title>
+  <desc id="desc">Sequence diagrams for WDM device registration and Mercury websocket creation, KMS ECDH setup, Mercury ping/pong keepalive, and KMS key retrieval over REST with optional websocket-delivered responses.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#31485d" />
+    </marker>
+    <marker id="arrow-soft" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6f8294" />
+    </marker>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#203040" flood-opacity="0.16" />
+    </filter>
+  </defs>
+  <style>
+    .page { fill: #f5f7fb; }
+    .title { fill: #172331; font: 700 30px Arial, Helvetica, sans-serif; }
+    .subtitle { fill: #506172; font: 16px Arial, Helvetica, sans-serif; }
+    .section { fill: #ffffff; stroke: #d4dde7; stroke-width: 1.5; filter: url(#shadow); }
+    .section-title { fill: #223244; font: 700 15px Arial, Helvetica, sans-serif; }
+    .participant { fill: #fffaf2; stroke: #b78036; stroke-width: 1.5; }
+    .participant-sdk { fill: #eaf2ff; stroke: #4c79b8; stroke-width: 1.5; }
+    .participant-ws { fill: #eef8f0; stroke: #4d9362; stroke-width: 1.5; }
+    .participant-kms { fill: #f1eefb; stroke: #7764af; stroke-width: 1.5; }
+    .note { fill: #ecf7f7; stroke: #43818a; stroke-width: 1.2; }
+    .label { fill: #1f2d3b; font: 700 13.5px Arial, Helvetica, sans-serif; }
+    .text { fill: #3d4d5f; font: 12px Arial, Helvetica, sans-serif; }
+    .small { fill: #536679; font: 11px Arial, Helvetica, sans-serif; }
+    .code { fill: #24384b; font: 11.5px Menlo, Consolas, monospace; }
+    .code-small { fill: #24384b; font: 10px Menlo, Consolas, monospace; }
+    .life { stroke: #c6d1dd; stroke-width: 1.3; stroke-dasharray: 5 6; }
+    .msg { stroke: #31485d; stroke-width: 1.8; fill: none; marker-end: url(#arrow); }
+    .return { stroke: #6f8294; stroke-width: 1.6; fill: none; stroke-dasharray: 5 5; marker-end: url(#arrow-soft); }
+    .divider { stroke: #d4dde7; stroke-width: 1.2; }
+  </style>
+
+  <rect class="page" x="0" y="0" width="1280" height="1500" />
+  <text class="title" x="48" y="48">REST and websocket message flows</text>
+  <text class="subtitle" x="48" y="76">Device registration, KMS setup, Mercury keepalive, and key retrieval paths used by the SDK.</text>
+
+  <rect class="section" x="36" y="104" width="1210" height="314" rx="8" />
+  <text class="section-title" x="60" y="134">1. WDM device registration and Mercury websocket creation</text>
+
+  <rect class="participant-sdk" x="72" y="162" width="172" height="48" rx="7" />
+  <text class="label" x="100" y="190">SDK caller</text>
+  <rect class="participant-sdk" x="314" y="162" width="172" height="48" rx="7" />
+  <text class="label" x="340" y="190">DeviceClient</text>
+  <rect class="participant" x="556" y="162" width="172" height="48" rx="7" />
+  <text class="label" x="600" y="190">WDM REST</text>
+  <rect class="participant-ws" x="798" y="162" width="172" height="48" rx="7" />
+  <text class="label" x="832" y="190">Mercury WS</text>
+  <rect class="participant-sdk" x="1040" y="162" width="172" height="48" rx="7" />
+  <text class="label" x="1072" y="190">MercuryClient</text>
+
+  <line class="life" x1="158" y1="210" x2="158" y2="386" />
+  <line class="life" x1="400" y1="210" x2="400" y2="386" />
+  <line class="life" x1="642" y1="210" x2="642" y2="386" />
+  <line class="life" x1="884" y1="210" x2="884" y2="386" />
+  <line class="life" x1="1126" y1="210" x2="1126" y2="386" />
+
+  <path class="msg" d="M 158 244 L 400 244" />
+  <text class="code" x="184" y="236">conversation.connect()</text>
+  <text class="small" x="184" y="256">wires device info for KMS</text>
+
+  <path class="msg" d="M 400 284 L 642 284" />
+  <text class="code" x="430" y="276">POST /wdm/api/v1/devices</text>
+  <text class="small" x="430" y="296">includeUpstreamServices=all</text>
+
+  <path class="return" d="M 642 324 L 400 324" />
+  <text class="code" x="438" y="316">200/201 Device</text>
+  <text class="small" x="438" y="336">url, webSocketUrl, userId</text>
+
+  <path class="msg" d="M 400 364 L 1126 364" />
+  <text class="code" x="492" y="356">get_websocket_url() -> MercuryClient.connect()</text>
+  <text class="small" x="492" y="376">uses device webSocketUrl unless a custom URL is configured</text>
+
+  <path class="msg" d="M 1126 244 L 884 244" />
+  <text class="code" x="918" y="236">open WebSocket</text>
+  <text class="small" x="918" y="256">Authorization + TrackingID headers</text>
+
+  <path class="msg" d="M 1126 284 L 884 284" />
+  <text class="code" x="915" y="276">JSON {type:"authorization"}</text>
+  <text class="small" x="915" y="296">token inside data block</text>
+
+  <path class="return" d="M 884 324 L 1126 324" />
+  <text class="code" x="910" y="316">mercury.buffer_state</text>
+  <text class="small" x="910" y="336">or mercury.registration_status</text>
+
+  <rect class="section" x="36" y="448" width="1210" height="330" rx="8" />
+  <text class="section-title" x="60" y="478">2. KMS connection setup with ECDH</text>
+
+  <rect class="participant-sdk" x="72" y="506" width="188" height="48" rx="7" />
+  <text class="label" x="108" y="534">EncryptionClient</text>
+  <rect class="participant-sdk" x="328" y="506" width="188" height="48" rx="7" />
+  <text class="label" x="376" y="534">CoreHTTPClient</text>
+  <rect class="participant-kms" x="584" y="506" width="188" height="48" rx="7" />
+  <text class="label" x="636" y="534">KMS REST</text>
+  <rect class="participant-ws" x="840" y="506" width="188" height="48" rx="7" />
+  <text class="label" x="884" y="534">Mercury WS</text>
+  <rect class="participant-sdk" x="1072" y="506" width="138" height="48" rx="7" />
+  <text class="label" x="1108" y="534">Cache</text>
+
+  <line class="life" x1="166" y1="554" x2="166" y2="748" />
+  <line class="life" x1="422" y1="554" x2="422" y2="748" />
+  <line class="life" x1="678" y1="554" x2="678" y2="748" />
+  <line class="life" x1="934" y1="554" x2="934" y2="748" />
+  <line class="life" x1="1141" y1="554" x2="1141" y2="748" />
+
+  <path class="msg" d="M 166 586 L 678 586" />
+  <text class="code" x="224" y="578">GET /encryption/api/v1/kms/{userId}</text>
+  <text class="small" x="224" y="598">fetch kmsCluster + rsaPublicKey</text>
+
+  <path class="return" d="M 678 626 L 166 626" />
+  <text class="code" x="256" y="618">200 KMSInfo</text>
+  <text class="small" x="256" y="638">RSA wrapping key and target cluster</text>
+
+  <path class="msg" d="M 166 666 L 678 666" />
+  <text class="code" x="224" y="658">POST /kms/messages {kmsMessages:[RSA JWE create /ecdhe]}</text>
+  <text class="small" x="224" y="678">requestId registered before send</text>
+
+  <rect class="note" x="806" y="590" width="182" height="68" rx="7" />
+  <text class="label" x="826" y="616">If HTTP 202</text>
+  <text class="small" x="826" y="637">ECDH response arrives later</text>
+  <text class="small" x="826" y="653">as Mercury KMS message</text>
+
+  <path class="return" d="M 678 706 L 166 706" />
+  <text class="code" x="236" y="698">HTTP 200</text>
+  <text class="small" x="236" y="718">response JWE parsed immediately</text>
+
+  <path class="return" d="M 678 738 L 166 738" />
+  <text class="code" x="236" y="730">HTTP 202</text>
+  <text class="small" x="236" y="750">wait for matching requestId future</text>
+
+  <path class="return" d="M 934 760 L 166 760" />
+  <text class="small" x="600" y="752">Mercury-delivered ECDH response resolves the future</text>
+
+  <rect class="note" x="1050" y="714" width="162" height="48" rx="7" />
+  <text class="label" x="1070" y="734">ECDH context</text>
+  <text class="small" x="1070" y="754">cached for retrieval</text>
+
+  <rect class="section" x="36" y="808" width="1210" height="226" rx="8" />
+  <text class="section-title" x="60" y="838">3. Mercury ping/pong keepalive</text>
+
+  <rect class="participant-sdk" x="112" y="868" width="230" height="48" rx="7" />
+  <text class="label" x="170" y="896">MercuryClient</text>
+  <rect class="participant-ws" x="470" y="868" width="230" height="48" rx="7" />
+  <text class="label" x="520" y="896">Mercury WebSocket</text>
+  <rect class="participant-sdk" x="828" y="868" width="230" height="48" rx="7" />
+  <text class="label" x="876" y="896">Reader / ping tasks</text>
+
+  <line class="life" x1="227" y1="916" x2="227" y2="1000" />
+  <line class="life" x1="585" y1="916" x2="585" y2="1000" />
+  <line class="life" x1="943" y1="916" x2="943" y2="1000" />
+
+  <path class="msg" d="M 227 944 L 585 944" />
+  <text class="code" x="284" y="936">initial JSON {type:"ping"}</text>
+  <text class="small" x="284" y="956">sent after authorization confirmation</text>
+
+  <path class="msg" d="M 943 978 L 585 978" />
+  <text class="code" x="640" y="970">websocket protocol ping(timestamp)</text>
+  <text class="small" x="640" y="990">periodic keepalive task</text>
+
+  <path class="return" d="M 585 1008 L 943 1008" />
+  <text class="code" x="650" y="1022">websocket pong</text>
+
+  <rect class="section" x="36" y="1064" width="1210" height="340" rx="8" />
+  <text class="section-title" x="60" y="1094">4. KMS key retrieval message exchange</text>
+
+  <rect class="participant-sdk" x="72" y="1122" width="176" height="48" rx="7" />
+  <text class="label" x="118" y="1150">Caller</text>
+  <rect class="participant-sdk" x="310" y="1122" width="176" height="48" rx="7" />
+  <text class="label" x="346" y="1150">EncryptionClient</text>
+  <rect class="participant-kms" x="548" y="1122" width="176" height="48" rx="7" />
+  <text class="label" x="598" y="1150">KMS REST</text>
+  <rect class="participant-ws" x="786" y="1122" width="176" height="48" rx="7" />
+  <text class="label" x="830" y="1150">Mercury WS</text>
+  <rect class="participant-sdk" x="1024" y="1122" width="176" height="48" rx="7" />
+  <text class="label" x="1062" y="1150">Key cache</text>
+
+  <line class="life" x1="160" y1="1170" x2="160" y2="1370" />
+  <line class="life" x1="398" y1="1170" x2="398" y2="1370" />
+  <line class="life" x1="636" y1="1170" x2="636" y2="1370" />
+  <line class="life" x1="874" y1="1170" x2="874" y2="1370" />
+  <line class="life" x1="1112" y1="1170" x2="1112" y2="1370" />
+
+  <path class="msg" d="M 160 1194 L 398 1194" />
+  <text class="code" x="186" y="1186">get_key(key_uri)</text>
+  <text class="small" x="186" y="1206">sync facade blocks or async caller awaits</text>
+
+  <path class="msg" d="M 398 1234 L 636 1234" />
+  <text class="code" x="420" y="1226">POST /kms/messages</text>
+  <text class="small" x="420" y="1246">ECDH JWE method=retrieve</text>
+
+  <path class="return" d="M 636 1272 L 398 1272" />
+  <text class="code" x="442" y="1264">HTTP 200</text>
+  <text class="small" x="442" y="1284">kmsMessages in REST response</text>
+
+  <path class="return" d="M 636 1310 L 398 1310" />
+  <text class="code" x="442" y="1302">HTTP 202</text>
+  <text class="small" x="442" y="1322">wait for requestId future</text>
+
+  <path class="return" d="M 874 1346 L 398 1346" />
+  <text class="code" x="662" y="1338">encryption.kms_message</text>
+  <text class="small" x="662" y="1358">process_kms_messages() resolves future</text>
+
+  <path class="msg" d="M 398 1380 L 1112 1380" />
+  <text class="small" x="570" y="1398">Parse KMSMessage, cache Key, return Key to caller</text>
+</svg>
