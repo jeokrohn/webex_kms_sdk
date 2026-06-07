@@ -2,6 +2,8 @@
 
 Async Python SDK slice for Webex Mercury communication and KMS-backed message decryption.
 
+Based on https://github.com/WebexCommunity/webex-go-sdk, this package provides a focused implementation of the Webex Mercury protocol and KMS interactions needed for E2EE message decryption and conversation activity handling. It is designed to be used in conjunction with other Webex SDK components or as a standalone library for applications that need to interact with Webex conversations and messages.
+
 This package intentionally covers a narrow part of the Webex Go SDK behavior:
 
 - WDM device registration needed for Mercury
