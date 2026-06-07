@@ -13,11 +13,8 @@ from webex_kms_sdk.encryption import wrap_with_shared_secret
 def b64url(data: bytes) -> str:
     """Encode bytes as unpadded base64url text for test JWK values.
 
-    Args:
-        data: Bytes to encode.
-
-    Returns:
-        Base64url string without padding.
+    :param data: Bytes to encode.
+    :returns: Base64url string without padding.
     """
     return base64.urlsafe_b64encode(data).decode("ascii").rstrip("=")
 
@@ -25,8 +22,7 @@ def b64url(data: bytes) -> str:
 def test_process_activity_event() -> None:
     """Verify that conversation activity payloads become ``Activity`` models.
 
-    Returns:
-        None.
+    :returns: None.
     """
     # Arrange a Mercury event that carries the conversation activity shape.
     client = WebexClient("test-token")
@@ -57,8 +53,7 @@ def test_process_activity_event() -> None:
 async def test_get_message_content_decrypts_cached_key() -> None:
     """Verify cached KMS keys decrypt message content.
 
-    Returns:
-        None.
+    :returns: None.
     """
     # Arrange an encrypted display name with its key already cached.
     client = WebexClient("test-token")
@@ -89,8 +84,7 @@ async def test_get_message_content_decrypts_cached_key() -> None:
 async def test_conversation_dispatch_auto_decrypts_message_content() -> None:
     """Verify dispatched message activities are decrypted before handlers run.
 
-    Returns:
-        None.
+    :returns: None.
     """
     # Arrange a cached key and a handler that records observed activity content.
     client = WebexClient("test-token")
@@ -103,11 +97,8 @@ async def test_conversation_dispatch_auto_decrypts_message_content() -> None:
     async def handler(activity) -> None:
         """Capture content seen by the dispatched activity handler.
 
-        Args:
-            activity: Activity delivered by the conversation dispatcher.
-
-        Returns:
-            None.
+        :param activity: Activity delivered by the conversation dispatcher.
+        :returns: None.
         """
         if not seen.done():
             seen.set_result(activity.content)
@@ -137,8 +128,7 @@ async def test_conversation_dispatch_auto_decrypts_message_content() -> None:
 def test_process_event_kms_messages_extracts_supported_shapes() -> None:
     """Verify KMS messages are extracted from supported Mercury payload shapes.
 
-    Returns:
-        None.
+    :returns: None.
     """
     # Arrange a conversation client with a capture stub for KMS forwarding.
     client = WebexClient("test-token")

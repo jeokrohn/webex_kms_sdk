@@ -36,8 +36,7 @@ class APIError(Exception):
     def __str__(self) -> str:
         """Render the API error as a concise human-readable message.
 
-        Returns:
-            Message containing status, optional API message, and tracking ID.
+        :returns: Message containing status, optional API message, and tracking ID.
         """
         log.debug(
             "APIError.__str__: render API error status_code=%s tracking_id=%s",
@@ -115,11 +114,8 @@ class KMSProtocolError(RuntimeError):
 def api_error_from_response(response: httpx.Response) -> APIError:
     """Build the most specific API error for an HTTP response.
 
-    Args:
-        response: Error HTTP response returned by Webex.
-
-    Returns:
-        Typed ``APIError`` subclass matching the response status code.
+    :param response: Error HTTP response returned by Webex.
+    :returns: Typed ``APIError`` subclass matching the response status code.
     """
     # Extract structured error details from JSON payloads when available.
     log.debug(
@@ -188,11 +184,8 @@ def api_error_from_response(response: httpx.Response) -> APIError:
 def is_rate_limited(err: BaseException) -> bool:
     """Return whether an exception represents API rate limiting.
 
-    Args:
-        err: Exception instance to inspect.
-
-    Returns:
-        ``True`` when ``err`` is a ``RateLimitError``.
+    :param err: Exception instance to inspect.
+    :returns: ``True`` when ``err`` is a ``RateLimitError``.
     """
     result = isinstance(err, RateLimitError)
     log.debug("is_rate_limited: classify error type=%s result=%s", type(err).__name__, result)
@@ -202,11 +195,8 @@ def is_rate_limited(err: BaseException) -> bool:
 def is_not_found(err: BaseException) -> bool:
     """Return whether an exception represents a missing API resource.
 
-    Args:
-        err: Exception instance to inspect.
-
-    Returns:
-        ``True`` when ``err`` is a ``NotFoundError``.
+    :param err: Exception instance to inspect.
+    :returns: ``True`` when ``err`` is a ``NotFoundError``.
     """
     result = isinstance(err, NotFoundError)
     log.debug("is_not_found: classify error type=%s result=%s", type(err).__name__, result)
@@ -216,11 +206,8 @@ def is_not_found(err: BaseException) -> bool:
 def is_auth_error(err: BaseException) -> bool:
     """Return whether an exception represents an authentication failure.
 
-    Args:
-        err: Exception instance to inspect.
-
-    Returns:
-        ``True`` when ``err`` is an ``AuthError``.
+    :param err: Exception instance to inspect.
+    :returns: ``True`` when ``err`` is an ``AuthError``.
     """
     result = isinstance(err, AuthError)
     log.debug("is_auth_error: classify error type=%s result=%s", type(err).__name__, result)
@@ -230,11 +217,8 @@ def is_auth_error(err: BaseException) -> bool:
 def is_forbidden(err: BaseException) -> bool:
     """Return whether an exception represents an authorization failure.
 
-    Args:
-        err: Exception instance to inspect.
-
-    Returns:
-        ``True`` when ``err`` is a ``ForbiddenError``.
+    :param err: Exception instance to inspect.
+    :returns: ``True`` when ``err`` is a ``ForbiddenError``.
     """
     result = isinstance(err, ForbiddenError)
     log.debug("is_forbidden: classify error type=%s result=%s", type(err).__name__, result)
@@ -244,11 +228,8 @@ def is_forbidden(err: BaseException) -> bool:
 def is_conflict(err: BaseException) -> bool:
     """Return whether an exception represents an API conflict.
 
-    Args:
-        err: Exception instance to inspect.
-
-    Returns:
-        ``True`` when ``err`` is a ``ConflictError``.
+    :param err: Exception instance to inspect.
+    :returns: ``True`` when ``err`` is a ``ConflictError``.
     """
     result = isinstance(err, ConflictError)
     log.debug("is_conflict: classify error type=%s result=%s", type(err).__name__, result)
@@ -258,11 +239,8 @@ def is_conflict(err: BaseException) -> bool:
 def is_gone(err: BaseException) -> bool:
     """Return whether an exception represents a gone API resource.
 
-    Args:
-        err: Exception instance to inspect.
-
-    Returns:
-        ``True`` when ``err`` is a ``GoneError``.
+    :param err: Exception instance to inspect.
+    :returns: ``True`` when ``err`` is a ``GoneError``.
     """
     result = isinstance(err, GoneError)
     log.debug("is_gone: classify error type=%s result=%s", type(err).__name__, result)
@@ -272,11 +250,8 @@ def is_gone(err: BaseException) -> bool:
 def is_locked(err: BaseException) -> bool:
     """Return whether an exception represents a locked API resource.
 
-    Args:
-        err: Exception instance to inspect.
-
-    Returns:
-        ``True`` when ``err`` is a ``LockedError``.
+    :param err: Exception instance to inspect.
+    :returns: ``True`` when ``err`` is a ``LockedError``.
     """
     result = isinstance(err, LockedError)
     log.debug("is_locked: classify error type=%s result=%s", type(err).__name__, result)
@@ -286,11 +261,8 @@ def is_locked(err: BaseException) -> bool:
 def is_precondition_required(err: BaseException) -> bool:
     """Return whether an exception requires request preconditions.
 
-    Args:
-        err: Exception instance to inspect.
-
-    Returns:
-        ``True`` when ``err`` is a ``PreconditionRequiredError``.
+    :param err: Exception instance to inspect.
+    :returns: ``True`` when ``err`` is a ``PreconditionRequiredError``.
     """
     result = isinstance(err, PreconditionRequiredError)
     log.debug(
@@ -304,11 +276,8 @@ def is_precondition_required(err: BaseException) -> bool:
 def is_server_error(err: BaseException) -> bool:
     """Return whether an exception represents a retryable server failure.
 
-    Args:
-        err: Exception instance to inspect.
-
-    Returns:
-        ``True`` when ``err`` is a ``ServerError``.
+    :param err: Exception instance to inspect.
+    :returns: ``True`` when ``err`` is a ``ServerError``.
     """
     result = isinstance(err, ServerError)
     log.debug("is_server_error: classify error type=%s result=%s", type(err).__name__, result)
@@ -318,11 +287,8 @@ def is_server_error(err: BaseException) -> bool:
 def _response_preview(response: httpx.Response) -> str:
     """Return a bounded API response body preview for debug logging.
 
-    Args:
-        response: HTTP response whose body should be summarized.
-
-    Returns:
-        Text preview of the response body.
+    :param response: HTTP response whose body should be summarized.
+    :returns: Text preview of the response body.
     """
     try:
         body = response.text

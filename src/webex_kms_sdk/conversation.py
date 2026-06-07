@@ -32,14 +32,11 @@ class ConversationClient:
     ) -> None:
         """Create a conversation client wired to Mercury and KMS clients.
 
-        Args:
-            core: Shared HTTP client reserved for future conversation APIs.
-            config: Runtime configuration shared with the sub-clients.
-            mercury: Mercury client used to receive websocket events.
-            encryption: Encryption client used to decrypt message content.
-
-        Returns:
-            None.
+        :param core: Shared HTTP client reserved for future conversation APIs.
+        :param config: Runtime configuration shared with the sub-clients.
+        :param mercury: Mercury client used to receive websocket events.
+        :param encryption: Encryption client used to decrypt message content.
+        :returns: None.
         """
         log.debug("ConversationClient.__init__: initialize conversation client")
         self._core = core
@@ -52,12 +49,9 @@ class ConversationClient:
     def on(self, verb: str, handler: ActivityHandler) -> None:
         """Register an activity handler for a conversation verb.
 
-        Args:
-            verb: Activity verb such as ``post``, ``share``, or ``*``.
-            handler: Callable invoked with matching activities.
-
-        Returns:
-            None.
+        :param verb: Activity verb such as ``post``, ``share``, or ``*``.
+        :param handler: Callable invoked with matching activities.
+        :returns: None.
         """
         if handler is None:
             log.debug("ConversationClient.on: skip empty handler verb=%s", verb)
@@ -68,12 +62,9 @@ class ConversationClient:
     def off(self, verb: str, handler: ActivityHandler) -> None:
         """Remove a previously registered activity handler.
 
-        Args:
-            verb: Activity verb whose handler list should be updated.
-            handler: Handler object to remove by identity.
-
-        Returns:
-            None.
+        :param verb: Activity verb whose handler list should be updated.
+        :param handler: Handler object to remove by identity.
+        :returns: None.
         """
         log.debug("ConversationClient.off: remove activity handler verb=%s", verb)
         handlers = self._handlers.get(verb)
@@ -87,8 +78,7 @@ class ConversationClient:
     async def connect(self) -> None:
         """Connect Mercury after sharing device details with the encryption client.
 
-        Returns:
-            None.
+        :returns: None.
         """
         # Provide device identity to KMS so outbound retrieve requests have a client ID.
         log.debug("ConversationClient.connect: wire encryption device info")
@@ -99,8 +89,7 @@ class ConversationClient:
     async def disconnect(self) -> None:
         """Disconnect the underlying Mercury websocket client.
 
-        Returns:
-            None.
+        :returns: None.
         """
         log.debug("ConversationClient.disconnect: disconnect Mercury client")
         await self._mercury.disconnect()
@@ -108,11 +97,8 @@ class ConversationClient:
     def process_activity_event(self, event: MercuryEvent) -> Activity:
         """Extract a conversation activity from a Mercury event.
 
-        Args:
-            event: Mercury event expected to contain conversation activity data.
-
-        Returns:
-            Parsed ``Activity`` model.
+        :param event: Mercury event expected to contain conversation activity data.
+        :returns: Parsed ``Activity`` model.
         """
         log.debug(
             "ConversationClient.process_activity_event: parse activity event id=%s event_type=%s",
@@ -129,11 +115,8 @@ class ConversationClient:
     async def get_message_content(self, activity: Activity) -> str:
         """Return plaintext message content for an activity when possible.
 
-        Args:
-            activity: Conversation activity to inspect and optionally decrypt.
-
-        Returns:
-            Plaintext content, falling back to display name when decryption fails.
+        :param activity: Conversation activity to inspect and optionally decrypt.
+        :returns: Plaintext content, falling back to display name when decryption fails.
         """
         # Prefer content that has already been decrypted or populated by dispatch.
         log.debug(
@@ -176,11 +159,8 @@ class ConversationClient:
     def process_event_kms_messages(self, event: MercuryEvent) -> None:
         """Extract and process KMS messages embedded in a Mercury event.
 
-        Args:
-            event: Mercury event that may contain KMS response JWEs.
-
-        Returns:
-            None.
+        :param event: Mercury event that may contain KMS response JWEs.
+        :returns: None.
         """
         log.debug(
             "ConversationClient.process_event_kms_messages: extract KMS messages event_id=%s",
@@ -253,8 +233,7 @@ class ConversationClient:
     def encryption_client(self) -> EncryptionClient:
         """Return the encryption client used by this conversation client.
 
-        Returns:
-            Bound ``EncryptionClient`` instance.
+        :returns: Bound ``EncryptionClient`` instance.
         """
         log.debug("ConversationClient.encryption_client: return encryption client")
         return self._encryption
@@ -262,8 +241,7 @@ class ConversationClient:
     def mercury_client(self) -> MercuryClient:
         """Return the Mercury client used by this conversation client.
 
-        Returns:
-            Bound ``MercuryClient`` instance.
+        :returns: Bound ``MercuryClient`` instance.
         """
         log.debug("ConversationClient.mercury_client: return Mercury client")
         return self._mercury
@@ -271,8 +249,7 @@ class ConversationClient:
     def _wire_mercury(self) -> None:
         """Register internal Mercury handlers needed by conversation dispatch.
 
-        Returns:
-            None.
+        :returns: None.
         """
         log.debug("ConversationClient._wire_mercury: register internal Mercury handlers")
         self._mercury.on("conversation.activity", self._handle_conversation_event)
@@ -281,8 +258,7 @@ class ConversationClient:
     async def _wire_encryption_device_info(self) -> None:
         """Copy Mercury device identity into the encryption client when available.
 
-        Returns:
-            None.
+        :returns: None.
         """
         # The Mercury device provider is intentionally optional for custom websocket URLs.
         log.debug(
@@ -317,11 +293,8 @@ class ConversationClient:
     async def _handle_conversation_event(self, event: MercuryEvent) -> None:
         """Handle a raw conversation Mercury event.
 
-        Args:
-            event: Mercury conversation event.
-
-        Returns:
-            None.
+        :param event: Mercury conversation event.
+        :returns: None.
         """
         # KMS messages can arrive alongside the activity that needs them.
         log.debug(
@@ -342,11 +315,8 @@ class ConversationClient:
     async def _handle_kms_event(self, event: MercuryEvent) -> None:
         """Handle a Mercury event that carries only KMS response messages.
 
-        Args:
-            event: Mercury encryption event.
-
-        Returns:
-            None.
+        :param event: Mercury encryption event.
+        :returns: None.
         """
         log.debug("ConversationClient._handle_kms_event: handle KMS event id=%s", event.id)
         self.process_event_kms_messages(event)
@@ -354,11 +324,8 @@ class ConversationClient:
     async def _dispatch_activity(self, activity: Activity) -> None:
         """Schedule handlers that match an activity verb.
 
-        Args:
-            activity: Activity to dispatch.
-
-        Returns:
-            None.
+        :param activity: Activity to dispatch.
+        :returns: None.
         """
         # Combine verb-specific handlers with wildcard observers.
         handlers = list(self._handlers.get(activity.verb, []))
@@ -376,12 +343,9 @@ class ConversationClient:
     async def _invoke_activity_handler(self, handler: ActivityHandler, activity: Activity) -> None:
         """Invoke one activity handler with optional message decryption first.
 
-        Args:
-            handler: Handler callable to invoke.
-            activity: Activity passed to the handler.
-
-        Returns:
-            None.
+        :param handler: Handler callable to invoke.
+        :param activity: Activity passed to the handler.
+        :returns: None.
         """
         # Populate message content before user code observes post/share activities.
         log.debug(
@@ -400,11 +364,8 @@ class ConversationClient:
     async def _process_message_content(self, activity: Activity) -> None:
         """Populate plaintext message content on an activity when possible.
 
-        Args:
-            activity: Activity whose object may contain encrypted message content.
-
-        Returns:
-            None.
+        :param activity: Activity whose object may contain encrypted message content.
+        :returns: None.
         """
         log.debug(
             "ConversationClient._process_message_content: process message content activity_id=%s",

@@ -10,11 +10,8 @@ log = logging.getLogger(__name__)
 def _b64url_decode(value: str) -> bytes:
     """Decode a base64url string that may omit padding.
 
-    Args:
-        value: Base64url-encoded string.
-
-    Returns:
-        Decoded bytes.
+    :param value: Base64url-encoded string.
+    :returns: Decoded bytes.
     """
     import base64
 
@@ -38,12 +35,9 @@ class Device:
     def from_dict(cls, data: dict[str, Any], etag: str = "") -> Device:
         """Create a ``Device`` from a WDM response object.
 
-        Args:
-            data: Raw WDM device response dictionary.
-            etag: Optional entity tag from the HTTP response.
-
-        Returns:
-            Normalized ``Device`` instance.
+        :param data: Raw WDM device response dictionary.
+        :param etag: Optional entity tag from the HTTP response.
+        :returns: Normalized ``Device`` instance.
         """
         log.debug(
             "Device.from_dict: parse API device response url=%s websocket_present=%s "
@@ -88,11 +82,8 @@ class MercuryEvent:
     def from_dict(cls, data: dict[str, Any]) -> MercuryEvent:
         """Create a ``MercuryEvent`` from a raw websocket event.
 
-        Args:
-            data: Raw Mercury event dictionary.
-
-        Returns:
-            Normalized event with header overrides and metadata extracted.
+        :param data: Raw Mercury event dictionary.
+        :returns: Normalized event with header overrides and metadata extracted.
         """
         # Copy raw wire fields into stable attributes.
         log.debug(
@@ -120,8 +111,7 @@ class MercuryEvent:
     def apply_header_overrides(self) -> None:
         """Apply Mercury header IDs that override top-level event fields.
 
-        Returns:
-            None.
+        :returns: None.
         """
         if not self.headers:
             return
@@ -137,8 +127,7 @@ class MercuryEvent:
     def extract_metadata(self) -> None:
         """Extract event and activity metadata used by client dispatchers.
 
-        Returns:
-            None.
+        :returns: None.
         """
         # Capture the broad event type first; only conversation events carry activity metadata.
         log.debug("MercuryEvent.extract_metadata: extract event metadata event_id=%s", self.id)
@@ -190,11 +179,8 @@ class JWK:
     def from_dict(cls, data: dict[str, Any]) -> JWK:
         """Create a ``JWK`` from a dictionary.
 
-        Args:
-            data: JSON Web Key fields.
-
-        Returns:
-            Normalized ``JWK`` instance.
+        :param data: JSON Web Key fields.
+        :returns: Normalized ``JWK`` instance.
         """
         log.debug(
             "JWK.from_dict: parse JWK key_type=%s kid=%s fields=%s",
@@ -218,11 +204,8 @@ class JWK:
     def to_dict(self, include_private: bool = True) -> dict[str, str]:
         """Serialize the key to a compact JWK dictionary.
 
-        Args:
-            include_private: Whether to include private key material such as ``d``.
-
-        Returns:
-            Dictionary containing only populated JWK fields.
+        :param include_private: Whether to include private key material such as ``d``.
+        :returns: Dictionary containing only populated JWK fields.
         """
         log.debug(
             "JWK.to_dict: serialize JWK key_type=%s kid=%s include_private=%s",
@@ -250,8 +233,7 @@ class JWK:
     def symmetric_key(self) -> bytes:
         """Decode this JWK as an octet symmetric key.
 
-        Returns:
-            Raw symmetric key bytes.
+        :returns: Raw symmetric key bytes.
         """
         log.debug("JWK.symmetric_key: decode symmetric key kid=%s key_type=%s", self.kid, self.kty)
         if self.kty != "oct":
@@ -272,11 +254,8 @@ class Key:
     def from_dict(cls, data: dict[str, Any]) -> Key:
         """Create a ``Key`` from a KMS response object.
 
-        Args:
-            data: Raw key dictionary from KMS.
-
-        Returns:
-            Normalized ``Key`` instance.
+        :param data: Raw key dictionary from KMS.
+        :returns: Normalized ``Key`` instance.
         """
         log.debug("Key.from_dict: parse KMS key uri=%s", data.get("uri"))
         return cls(uri=str(data.get("uri") or ""), jwk=JWK.from_dict(dict(data.get("jwk") or {})))
@@ -284,8 +263,7 @@ class Key:
     def to_dict(self) -> dict[str, Any]:
         """Serialize the key envelope to a dictionary.
 
-        Returns:
-            Dictionary containing the key URI and JWK fields.
+        :returns: Dictionary containing the key URI and JWK fields.
         """
         log.debug("Key.to_dict: serialize KMS key uri=%s", self.uri)
         return {"uri": self.uri, "jwk": self.jwk.to_dict()}
@@ -312,11 +290,8 @@ class KMSMessage:
     def from_dict(cls, data: dict[str, Any]) -> KMSMessage:
         """Create a ``KMSMessage`` from a raw KMS payload.
 
-        Args:
-            data: Raw KMS message dictionary.
-
-        Returns:
-            Normalized ``KMSMessage`` instance.
+        :param data: Raw KMS message dictionary.
+        :returns: Normalized ``KMSMessage`` instance.
         """
         # Parse optional single-key, multi-key, and ECDH JWK fields.
         log.debug(
@@ -347,8 +322,7 @@ class KMSMessage:
     def is_success(self) -> bool:
         """Return whether the message status indicates a successful KMS operation.
 
-        Returns:
-            ``True`` for successful numeric or string KMS status values.
+        :returns: ``True`` for successful numeric or string KMS status values.
         """
         log.debug("KMSMessage.is_success: evaluate KMS status status=%s", self.status)
         if isinstance(self.status, str):
@@ -377,11 +351,8 @@ class ConversationObject:
     def from_dict(cls, data: dict[str, Any]) -> ConversationObject:
         """Create a conversation object from activity object data.
 
-        Args:
-            data: Raw activity object dictionary.
-
-        Returns:
-            Normalized ``ConversationObject`` instance.
+        :param data: Raw activity object dictionary.
+        :returns: Normalized ``ConversationObject`` instance.
         """
         log.debug(
             "ConversationObject.from_dict: parse conversation object id=%s type=%s",
@@ -423,12 +394,9 @@ class Activity:
     def from_dict(cls, data: dict[str, Any], raw_data: dict[str, Any] | None = None) -> Activity:
         """Create an activity from conversation payload data.
 
-        Args:
-            data: Raw activity dictionary.
-            raw_data: Optional parent event data to retain for callers.
-
-        Returns:
-            Normalized ``Activity`` instance.
+        :param data: Raw activity dictionary.
+        :param raw_data: Optional parent event data to retain for callers.
+        :returns: Normalized ``Activity`` instance.
         """
         log.debug(
             "Activity.from_dict: parse activity id=%s verb=%s encrypted=%s",

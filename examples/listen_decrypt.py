@@ -16,8 +16,7 @@ log = logging.getLogger(__name__)
 async def main() -> None:
     """Connect to Mercury and print decrypted post/share activity content.
 
-    Returns:
-        None.
+    :returns: None.
     """
     # Load .env from the project root so local examples can run without shell exports.
     log.debug("main: load environment configuration")
@@ -35,11 +34,8 @@ async def main() -> None:
     async def on_message(activity: Activity) -> None:
         """Print one decrypted conversation message activity.
 
-        Args:
-            activity: Activity received from the conversation client.
-
-        Returns:
-            None.
+        :param activity: Activity received from the conversation client.
+        :returns: None.
         """
         log.debug("main.on_message: decrypt and print activity activity_id=%s", activity.id)
         actor = activity.actor.get("displayName") or activity.actor.get("id") or "unknown"

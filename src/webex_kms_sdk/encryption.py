@@ -63,12 +63,9 @@ class EncryptionClient:
     def __init__(self, core: CoreHTTPClient, config: Config) -> None:
         """Create an encryption client.
 
-        Args:
-            core: Shared HTTP client used for Webex and KMS requests.
-            config: Runtime configuration for KMS endpoints, timeouts, and cache behavior.
-
-        Returns:
-            None.
+        :param core: Shared HTTP client used for Webex and KMS requests.
+        :param config: Runtime configuration for KMS endpoints, timeouts, and cache behavior.
+        :returns: None.
         """
         log.debug("EncryptionClient.__init__: initialize encryption client")
         self._core = core
@@ -87,12 +84,9 @@ class EncryptionClient:
     def set_device_info(self, device_url: str, user_id: str) -> None:
         """Set device identity used in outbound KMS requests.
 
-        Args:
-            device_url: WDM device URL to use as the KMS client identifier.
-            user_id: Webex user ID associated with the device.
-
-        Returns:
-            None.
+        :param device_url: WDM device URL to use as the KMS client identifier.
+        :param user_id: Webex user ID associated with the device.
+        :returns: None.
         """
         log.debug(
             "EncryptionClient.set_device_info: set KMS device info device_url=%s "
@@ -106,11 +100,8 @@ class EncryptionClient:
     async def get_key(self, key_uri: str) -> Key:
         """Retrieve a KMS key by URI with caching and inflight coalescing.
 
-        Args:
-            key_uri: KMS key URI to retrieve.
-
-        Returns:
-            Retrieved ``Key`` model.
+        :param key_uri: KMS key URI to retrieve.
+        :returns: Retrieved ``Key`` model.
         """
         # Serve cached keys first when cache use is enabled.
         log.debug("EncryptionClient.get_key: retrieve key key_uri=%s", key_uri)
@@ -153,11 +144,8 @@ class EncryptionClient:
     def cache_key(self, key: Key | None) -> None:
         """Store a KMS key in the local cache when it has a URI.
 
-        Args:
-            key: Optional key to cache.
-
-        Returns:
-            None.
+        :param key: Optional key to cache.
+        :returns: None.
         """
         if key is None or not key.uri:
             log.debug("EncryptionClient.cache_key: skip empty key")
@@ -168,11 +156,8 @@ class EncryptionClient:
     def process_kms_messages(self, jwe_strings: list[str]) -> None:
         """Process KMS response messages received over Mercury.
 
-        Args:
-            jwe_strings: Raw KMS messages, usually compact JWE strings.
-
-        Returns:
-            None.
+        :param jwe_strings: Raw KMS messages, usually compact JWE strings.
+        :returns: None.
         """
         # Snapshot current ECDH state and pending exchange keys for decrypt attempts.
         log.debug(
@@ -286,12 +271,9 @@ class EncryptionClient:
     async def decrypt_text(self, key_uri: str, ciphertext: str) -> str:
         """Decrypt UTF-8 text encrypted with a KMS-managed symmetric key.
 
-        Args:
-            key_uri: KMS URI for the symmetric key.
-            ciphertext: Compact JWE ciphertext.
-
-        Returns:
-            Decrypted UTF-8 plaintext.
+        :param key_uri: KMS URI for the symmetric key.
+        :param ciphertext: Compact JWE ciphertext.
+        :returns: Decrypted UTF-8 plaintext.
         """
         if not key_uri:
             raise ValueError("key URI is required")
@@ -313,12 +295,9 @@ class EncryptionClient:
     async def decrypt_message_content(self, encryption_key_url: str, encrypted_content: str) -> str:
         """Decrypt a Webex message content field.
 
-        Args:
-            encryption_key_url: KMS key URI from the activity.
-            encrypted_content: Encrypted display name/content value.
-
-        Returns:
-            Decrypted message content.
+        :param encryption_key_url: KMS key URI from the activity.
+        :param encrypted_content: Encrypted display name/content value.
+        :returns: Decrypted message content.
         """
         if not encryption_key_url:
             raise ValueError("encryption key URL is required")
@@ -335,11 +314,8 @@ class EncryptionClient:
     async def _retrieve_and_cache_key(self, key_uri: str) -> Key:
         """Retrieve a key and store it in the cache when configured.
 
-        Args:
-            key_uri: KMS key URI to retrieve.
-
-        Returns:
-            Retrieved ``Key`` model.
+        :param key_uri: KMS key URI to retrieve.
+        :returns: Retrieved ``Key`` model.
         """
         log.debug("EncryptionClient._retrieve_and_cache_key: retrieve key key_uri=%s", key_uri)
         key = await self._retrieve_key_from_kms(key_uri)
@@ -355,11 +331,8 @@ class EncryptionClient:
     async def _retrieve_key_from_kms(self, key_uri: str) -> Key:
         """Retrieve a key through the supported KMS transport.
 
-        Args:
-            key_uri: KMS key URI to retrieve.
-
-        Returns:
-            Retrieved ``Key`` model.
+        :param key_uri: KMS key URI to retrieve.
+        :returns: Retrieved ``Key`` model.
         """
         log.debug(
             "EncryptionClient._retrieve_key_from_kms: select KMS retrieval transport key_uri=%s",
@@ -370,11 +343,8 @@ class EncryptionClient:
     async def _retrieve_key_via_ecdh(self, key_uri: str) -> Key:
         """Retrieve a KMS key using an ECDH session.
 
-        Args:
-            key_uri: KMS key URI to retrieve.
-
-        Returns:
-            Retrieved ``Key`` model.
+        :param key_uri: KMS key URI to retrieve.
+        :returns: Retrieved ``Key`` model.
         """
         log.debug(
             "EncryptionClient._retrieve_key_via_ecdh: retrieve key via ECDH key_uri=%s",
@@ -415,12 +385,9 @@ class EncryptionClient:
     async def _do_kms_retrieve(self, key_uri: str, ecdh_context: ECDHContext) -> Key:
         """Send one retrieve request through an established ECDH context.
 
-        Args:
-            key_uri: KMS key URI to retrieve.
-            ecdh_context: Active ECDH context used to wrap the request.
-
-        Returns:
-            Retrieved ``Key`` model.
+        :param key_uri: KMS key URI to retrieve.
+        :param ecdh_context: Active ECDH context used to wrap the request.
+        :returns: Retrieved ``Key`` model.
         """
         # Resolve caller identity and register a future for possible Mercury delivery.
         log.debug("EncryptionClient._do_kms_retrieve: prepare KMS retrieve key_uri=%s", key_uri)
@@ -493,8 +460,7 @@ class EncryptionClient:
     async def _get_or_create_ecdh(self) -> ECDHContext:
         """Return a valid cached ECDH context or create a new one.
 
-        Returns:
-            Active ``ECDHContext``.
+        :returns: Active ``ECDHContext``.
         """
         async with self._ecdh_lock:
             log.debug("EncryptionClient._get_or_create_ecdh: inspect cached ECDH context")
@@ -518,8 +484,7 @@ class EncryptionClient:
     async def _invalidate_ecdh(self) -> None:
         """Clear the cached ECDH context.
 
-        Returns:
-            None.
+        :returns: None.
         """
         log.debug("EncryptionClient._invalidate_ecdh: clear cached ECDH context")
         async with self._ecdh_lock:
@@ -528,8 +493,7 @@ class EncryptionClient:
     async def _perform_ecdh_exchange(self) -> ECDHContext:
         """Perform an ECDH create request with KMS.
 
-        Returns:
-            Newly established ``ECDHContext``.
+        :returns: Newly established ``ECDHContext``.
         """
         # Fetch user and KMS cluster metadata before generating client key material.
         log.debug("EncryptionClient._perform_ecdh_exchange: fetch user and KMS metadata")
@@ -577,15 +541,12 @@ class EncryptionClient:
     ) -> KMSMessage:
         """Send the ECDH create request that establishes a shared KMS secret.
 
-        Args:
-            local_private_key: Client EC private key for the exchange.
-            rsa_public_key: KMS RSA key used to wrap the create request.
-            rsa_kid: KMS RSA key identifier.
-            cluster: KMS cluster destination.
-            user_id: Webex user ID used in the KMS credential block.
-
-        Returns:
-            KMS response message containing KMS-side ECDH public material.
+        :param local_private_key: Client EC private key for the exchange.
+        :param rsa_public_key: KMS RSA key used to wrap the create request.
+        :param rsa_kid: KMS RSA key identifier.
+        :param cluster: KMS cluster destination.
+        :param user_id: Webex user ID used in the KMS credential block.
+        :returns: KMS response message containing KMS-side ECDH public material.
         """
         # Register the request with the EC private key for possible async response decryption.
         log.debug(
@@ -660,8 +621,7 @@ class EncryptionClient:
     async def _get_user_id(self) -> str:
         """Return the cached or API-derived Webex user ID.
 
-        Returns:
-            Webex user ID.
+        :returns: Webex user ID.
         """
         if self._user_id:
             log.debug("EncryptionClient._get_user_id: use cached user ID")
@@ -690,11 +650,8 @@ class EncryptionClient:
     async def _get_kms_info(self, user_id: str) -> KMSInfo:
         """Fetch KMS cluster metadata for a user.
 
-        Args:
-            user_id: Webex user ID in encoded or UUID form.
-
-        Returns:
-            ``KMSInfo`` containing the target cluster and RSA public key payload.
+        :param user_id: Webex user ID in encoded or UUID form.
+        :returns: ``KMSInfo`` containing the target cluster and RSA public key payload.
         """
         # KMS info endpoints expect the decoded UUID form of the Webex user ID.
         kms_user_id = decode_webex_id(user_id)
@@ -729,12 +686,9 @@ class EncryptionClient:
     async def _send_kms_message(self, wrapped_message: str, destination: str) -> list[str] | None:
         """Send one wrapped KMS message to the messages endpoint.
 
-        Args:
-            wrapped_message: Compact JWE request payload.
-            destination: KMS destination cluster or host.
-
-        Returns:
-            List of synchronous KMS response JWEs, or ``None`` for async delivery.
+        :param wrapped_message: Compact JWE request payload.
+        :param destination: KMS destination cluster or host.
+        :returns: List of synchronous KMS response JWEs, or ``None`` for async delivery.
         """
         # Wrap the message in the HTTP envelope accepted by KMS.
         envelope: dict[str, Any] = {"kmsMessages": [wrapped_message]}
@@ -783,12 +737,9 @@ class EncryptionClient:
     ) -> asyncio.Future[bytes]:
         """Register a pending KMS request for asynchronous Mercury completion.
 
-        Args:
-            request_id: KMS request ID to match against future responses.
-            ecdh_private_key: Optional private key needed to decrypt ECDH create replies.
-
-        Returns:
-            Future that will receive the raw response payload.
+        :param request_id: KMS request ID to match against future responses.
+        :param ecdh_private_key: Optional private key needed to decrypt ECDH create replies.
+        :returns: Future that will receive the raw response payload.
         """
         log.debug(
             "EncryptionClient._register_pending_request: register pending KMS request "
@@ -804,11 +755,8 @@ class EncryptionClient:
     def _unregister_pending_request(self, request_id: str) -> None:
         """Remove a pending KMS request registration.
 
-        Args:
-            request_id: KMS request ID to remove.
-
-        Returns:
-            None.
+        :param request_id: KMS request ID to remove.
+        :returns: None.
         """
         log.debug(
             "EncryptionClient._unregister_pending_request: unregister pending KMS "
@@ -822,12 +770,9 @@ class EncryptionClient:
     ) -> Key:
         """Decrypt synchronous key response JWEs and parse the first valid key.
 
-        Args:
-            response_jwes: Compact JWE responses returned by KMS.
-            ecdh_context: ECDH context whose shared secret decrypts the responses.
-
-        Returns:
-            Retrieved ``Key`` model.
+        :param response_jwes: Compact JWE responses returned by KMS.
+        :param ecdh_context: ECDH context whose shared secret decrypts the responses.
+        :returns: Retrieved ``Key`` model.
         """
         # Try each response until one decrypts and contains a usable key payload.
         log.debug(
@@ -850,11 +795,8 @@ class EncryptionClient:
     def _parse_key_from_payload(self, payload: bytes) -> Key:
         """Parse a KMS payload and extract its key material.
 
-        Args:
-            payload: Raw JSON KMS response bytes.
-
-        Returns:
-            Retrieved ``Key`` model.
+        :param payload: Raw JSON KMS response bytes.
+        :returns: Retrieved ``Key`` model.
         """
         log.debug(
             "EncryptionClient._parse_key_from_payload: parse KMS key payload bytes=%s",
@@ -885,8 +827,7 @@ class EncryptionClient:
     def _get_client_id(self) -> str:
         """Return the client identifier used in KMS requests.
 
-        Returns:
-            Device URL when available, otherwise a stable SDK fallback identifier.
+        :returns: Device URL when available, otherwise a stable SDK fallback identifier.
         """
         log.debug(
             "EncryptionClient._get_client_id: resolve KMS client ID device_url_present=%s",
@@ -898,11 +839,8 @@ class EncryptionClient:
 def parse_kms_uri(key_uri: str) -> tuple[str, str]:
     """Split a KMS URI into domain and resource path.
 
-    Args:
-        key_uri: URI beginning with ``kms://``.
-
-    Returns:
-        Tuple of ``(domain, resource_path)``.
+    :param key_uri: URI beginning with ``kms://``.
+    :returns: Tuple of ``(domain, resource_path)``.
     """
     # Validate the URI prefix and required domain/path structure.
     log.debug("parse_kms_uri: parse KMS URI key_uri=%s", key_uri)
@@ -919,22 +857,16 @@ def parse_kms_uri(key_uri: str) -> tuple[str, str]:
 def kms_cluster_from_domain(domain: str, default_kms_cluster: str) -> str:
     """Choose a KMS destination cluster from a KMS URI domain.
 
-    Args:
-        domain: Domain portion of a KMS URI.
-        default_kms_cluster: Fallback cluster when the domain is not cluster-like.
-
-    Returns:
-        Cluster or cluster host suitable for KMS message destination.
+    :param domain: Domain portion of a KMS URI.
+    :param default_kms_cluster: Fallback cluster when the domain is not cluster-like.
+    :returns: Cluster or cluster host suitable for KMS message destination.
     """
 
     def clean(value: str) -> str:
         """Remove an optional KMS URI prefix from a cluster value.
 
-        Args:
-            value: Cluster or domain value to normalize.
-
-        Returns:
-            Value without a leading ``kms://`` prefix.
+        :param value: Cluster or domain value to normalize.
+        :returns: Value without a leading ``kms://`` prefix.
         """
         return value.removeprefix("kms://")
 
@@ -957,12 +889,9 @@ def kms_cluster_from_domain(domain: str, default_kms_cluster: str) -> str:
 def get_cluster_from_domain(domain: str, default_cluster: str) -> str:
     """Infer the short KMS cluster name from a domain.
 
-    Args:
-        domain: KMS domain, short cluster, or organization domain.
-        default_cluster: Fallback cluster name.
-
-    Returns:
-        Short cluster name such as ``a``.
+    :param domain: KMS domain, short cluster, or organization domain.
+    :param default_cluster: Fallback cluster name.
+    :returns: Short cluster name such as ``a``.
     """
     log.debug(
         "get_cluster_from_domain: infer KMS cluster domain=%s default=%s",
@@ -988,8 +917,7 @@ def get_cluster_from_domain(domain: str, default_cluster: str) -> str:
 def generate_request_id() -> str:
     """Generate a KMS request ID using the SDK-compatible prefix.
 
-    Returns:
-        Random request ID string.
+    :returns: Random request ID string.
     """
     data = os.urandom(16)
     request_id = (
@@ -1003,11 +931,8 @@ def generate_request_id() -> str:
 def decode_webex_id(value: str) -> str:
     """Decode a Webex ID into a UUID when it is base64url encoded.
 
-    Args:
-        value: UUID or base64url-encoded Webex resource ID.
-
-    Returns:
-        UUID if decoding succeeds and yields one, otherwise the original value.
+    :param value: UUID or base64url-encoded Webex resource ID.
+    :returns: UUID if decoding succeeds and yields one, otherwise the original value.
     """
     log.debug("decode_webex_id: decode Webex ID value_present=%s", bool(value))
     if UUID_RE.match(value):
@@ -1026,13 +951,10 @@ def decode_webex_id(value: str) -> str:
 def wrap_with_shared_secret(payload: bytes, shared_secret: bytes, kid: str = "") -> str:
     """Encrypt a payload as compact JWE using a direct shared secret.
 
-    Args:
-        payload: Plaintext bytes to encrypt.
-        shared_secret: Raw symmetric key bytes.
-        kid: Optional key ID to include in the protected header.
-
-    Returns:
-        Compact serialized JWE string.
+    :param payload: Plaintext bytes to encrypt.
+    :param shared_secret: Raw symmetric key bytes.
+    :param kid: Optional key ID to include in the protected header.
+    :returns: Compact serialized JWE string.
     """
     log.debug(
         "wrap_with_shared_secret: wrap payload bytes=%s kid_present=%s",
@@ -1053,12 +975,9 @@ def wrap_with_shared_secret(payload: bytes, shared_secret: bytes, kid: str = "")
 def unwrap_with_shared_secret(jwe_string: str, shared_secret: bytes) -> bytes:
     """Decrypt compact JWE payload encrypted with a direct shared secret.
 
-    Args:
-        jwe_string: Compact JWE string to decrypt.
-        shared_secret: Raw symmetric key bytes.
-
-    Returns:
-        Decrypted payload bytes.
+    :param jwe_string: Compact JWE string to decrypt.
+    :param shared_secret: Raw symmetric key bytes.
+    :returns: Decrypted payload bytes.
     """
     log.debug("unwrap_with_shared_secret: unwrap JWE length=%s", len(jwe_string))
     key = jose_jwk.JWK(kty="oct", k=_b64url_encode(shared_secret))
@@ -1073,13 +992,10 @@ def unwrap_with_shared_secret(jwe_string: str, shared_secret: bytes) -> bytes:
 def wrap_with_rsa(payload: bytes, rsa_public_key: rsa.RSAPublicKey, kid: str = "") -> str:
     """Encrypt a payload as compact JWE using an RSA public key.
 
-    Args:
-        payload: Plaintext bytes to encrypt.
-        rsa_public_key: RSA public key used for key wrapping.
-        kid: Optional key ID to include in the protected header.
-
-    Returns:
-        Compact serialized JWE string.
+    :param payload: Plaintext bytes to encrypt.
+    :param rsa_public_key: RSA public key used for key wrapping.
+    :param kid: Optional key ID to include in the protected header.
+    :returns: Compact serialized JWE string.
     """
     # Convert cryptography RSA numbers into the JWK shape expected by jwcrypto.
     log.debug(
@@ -1107,12 +1023,9 @@ def decrypt_ecdh_response(
 ) -> KMSMessage:
     """Decrypt ECDH response JWEs and parse the first valid KMS message.
 
-    Args:
-        response_jwes: Compact JWE responses from KMS.
-        local_private_key: EC private key generated for the ECDH request.
-
-    Returns:
-        Parsed ``KMSMessage`` containing ECDH response material.
+    :param response_jwes: Compact JWE responses from KMS.
+    :param local_private_key: EC private key generated for the ECDH request.
+    :returns: Parsed ``KMSMessage`` containing ECDH response material.
     """
     # Try each response because KMS can return multiple messages in one envelope.
     log.debug("decrypt_ecdh_response: decrypt ECDH response JWEs count=%s", len(response_jwes))
@@ -1139,12 +1052,9 @@ def derive_shared_secret(
 ) -> bytes:
     """Derive the KMS ECDH shared secret from a response message.
 
-    Args:
-        ecdh_response: KMS response containing server EC public key material.
-        local_private_key: Client EC private key for the exchange.
-
-    Returns:
-        32-byte shared secret derived with HKDF-SHA256.
+    :param ecdh_response: KMS response containing server EC public key material.
+    :param local_private_key: Client EC private key for the exchange.
+    :returns: 32-byte shared secret derived with HKDF-SHA256.
     """
     log.debug("derive_shared_secret: derive ECDH shared secret")
     server_jwk = extract_server_ec_key(ecdh_response)
@@ -1166,11 +1076,8 @@ def derive_shared_secret(
 def extract_server_ec_key(response: KMSMessage) -> JWK | None:
     """Extract server EC public key material from a KMS ECDH response.
 
-    Args:
-        response: Parsed KMS response message.
-
-    Returns:
-        Server EC ``JWK`` when present, otherwise ``None``.
+    :param response: Parsed KMS response message.
+    :returns: Server EC ``JWK`` when present, otherwise ``None``.
     """
     log.debug("extract_server_ec_key: extract server EC key")
     if response.key is not None and response.key.jwk.kty == "EC":
@@ -1183,11 +1090,8 @@ def extract_server_ec_key(response: KMSMessage) -> JWK | None:
 def ec_public_key_to_jwk(public_key: ec.EllipticCurvePublicKey) -> JWK:
     """Convert an EC public key to a P-256 JWK.
 
-    Args:
-        public_key: EC public key to serialize.
-
-    Returns:
-        Public ``JWK`` containing curve coordinates.
+    :param public_key: EC public key to serialize.
+    :returns: Public ``JWK`` containing curve coordinates.
     """
     log.debug("ec_public_key_to_jwk: convert EC public key to JWK")
     numbers = public_key.public_numbers()
@@ -1202,11 +1106,8 @@ def ec_public_key_to_jwk(public_key: ec.EllipticCurvePublicKey) -> JWK:
 def jwk_to_ec_public_key(value: JWK) -> ec.EllipticCurvePublicKey:
     """Convert a P-256 EC JWK into a cryptography public key.
 
-    Args:
-        value: JWK containing P-256 public coordinates.
-
-    Returns:
-        EC public key object.
+    :param value: JWK containing P-256 public coordinates.
+    :returns: EC public key object.
     """
     log.debug("jwk_to_ec_public_key: convert JWK to EC public key kid=%s", value.kid)
     if value.kty != "EC" or value.crv != "P-256":
@@ -1219,11 +1120,8 @@ def jwk_to_ec_public_key(value: JWK) -> ec.EllipticCurvePublicKey:
 def parse_rsa_public_key_from_json(raw: Any) -> tuple[rsa.RSAPublicKey, str]:
     """Parse an RSA public key from KMS JWK or JWKS data.
 
-    Args:
-        raw: KMS RSA public key field as a dictionary, JSON string, or JWKS dictionary.
-
-    Returns:
-        Tuple of RSA public key object and key ID.
+    :param raw: KMS RSA public key field as a dictionary, JSON string, or JWKS dictionary.
+    :returns: Tuple of RSA public key object and key ID.
     """
     log.debug(
         "parse_rsa_public_key_from_json: parse KMS RSA public key type=%s", type(raw).__name__
@@ -1255,11 +1153,8 @@ def parse_rsa_public_key_from_json(raw: Any) -> tuple[rsa.RSAPublicKey, str]:
 def jwk_to_rsa_public_key(value: JWK) -> rsa.RSAPublicKey:
     """Convert an RSA JWK into a cryptography public key.
 
-    Args:
-        value: RSA JWK containing modulus and exponent.
-
-    Returns:
-        RSA public key object.
+    :param value: RSA JWK containing modulus and exponent.
+    :returns: RSA public key object.
     """
     log.debug("jwk_to_rsa_public_key: convert RSA JWK kid=%s", value.kid)
     if value.kty != "RSA":
@@ -1277,12 +1172,9 @@ def jwk_to_rsa_public_key(value: JWK) -> rsa.RSAPublicKey:
 def _decrypt_ecdh_jwe(jwe_string: str, private_key: ec.EllipticCurvePrivateKey) -> bytes:
     """Decrypt a compact ECDH response JWE with the local EC private key.
 
-    Args:
-        jwe_string: Compact JWE string to decrypt.
-        private_key: EC private key generated for the request.
-
-    Returns:
-        Decrypted payload bytes.
+    :param jwe_string: Compact JWE string to decrypt.
+    :param private_key: EC private key generated for the request.
+    :returns: Decrypted payload bytes.
     """
     log.debug("_decrypt_ecdh_jwe: decrypt ECDH JWE length=%s", len(jwe_string))
     key = _ec_private_key_to_jwk(private_key)
@@ -1297,11 +1189,8 @@ def _decrypt_ecdh_jwe(jwe_string: str, private_key: ec.EllipticCurvePrivateKey) 
 def _ec_private_key_to_jwk(private_key: ec.EllipticCurvePrivateKey) -> jose_jwk.JWK:
     """Convert an EC private key to a jwcrypto JWK.
 
-    Args:
-        private_key: EC private key to serialize.
-
-    Returns:
-        jwcrypto JWK with public coordinates and private scalar.
+    :param private_key: EC private key to serialize.
+    :returns: jwcrypto JWK with public coordinates and private scalar.
     """
     log.debug("_ec_private_key_to_jwk: convert EC private key to JWK")
     numbers = private_key.private_numbers()
@@ -1318,11 +1207,8 @@ def _ec_private_key_to_jwk(private_key: ec.EllipticCurvePrivateKey) -> jose_jwk.
 def _is_ecdh_session_error(err: BaseException) -> bool:
     """Return whether an exception suggests the ECDH session should be refreshed.
 
-    Args:
-        err: Exception raised during a KMS request.
-
-    Returns:
-        ``True`` when the error message matches known session-failure markers.
+    :param err: Exception raised during a KMS request.
+    :returns: ``True`` when the error message matches known session-failure markers.
     """
     message = str(err)
     result = any(
@@ -1336,11 +1222,8 @@ def _is_ecdh_session_error(err: BaseException) -> bool:
 def _b64url_encode(data: bytes) -> str:
     """Encode bytes as unpadded base64url text.
 
-    Args:
-        data: Bytes to encode.
-
-    Returns:
-        ASCII base64url string without padding.
+    :param data: Bytes to encode.
+    :returns: ASCII base64url string without padding.
     """
     encoded = base64.urlsafe_b64encode(data).decode("ascii").rstrip("=")
     log.debug("_b64url_encode: encode bytes input=%s output_length=%s", len(data), len(encoded))
@@ -1350,11 +1233,8 @@ def _b64url_encode(data: bytes) -> str:
 def _b64url_decode(value: str) -> bytes:
     """Decode base64url text with optional omitted padding.
 
-    Args:
-        value: Base64url string to decode.
-
-    Returns:
-        Decoded bytes.
+    :param value: Base64url string to decode.
+    :returns: Decoded bytes.
     """
     log.debug("_b64url_decode: decode base64url length=%s", len(value))
     padding = "=" * (-len(value) % 4)
@@ -1364,11 +1244,8 @@ def _b64url_decode(value: str) -> bytes:
 def _int_to_b64url(value: int) -> str:
     """Encode an integer as unpadded base64url bytes.
 
-    Args:
-        value: Integer to encode.
-
-    Returns:
-        Base64url representation of the minimal big-endian byte string.
+    :param value: Integer to encode.
+    :returns: Base64url representation of the minimal big-endian byte string.
     """
     length = max(1, (value.bit_length() + 7) // 8)
     log.debug("_int_to_b64url: encode integer bits=%s bytes=%s", value.bit_length(), length)
@@ -1378,11 +1255,8 @@ def _int_to_b64url(value: int) -> str:
 def _pad_to_32(data: bytes) -> bytes:
     """Left-pad or trim a byte string to exactly 32 bytes.
 
-    Args:
-        data: Byte string to normalize.
-
-    Returns:
-        Exactly 32 bytes.
+    :param data: Byte string to normalize.
+    :returns: Exactly 32 bytes.
     """
     log.debug("_pad_to_32: normalize byte string length=%s", len(data))
     if len(data) >= 32:

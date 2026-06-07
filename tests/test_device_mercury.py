@@ -16,8 +16,7 @@ from webex_kms_sdk.core import CoreHTTPClient
 def test_config_defaults() -> None:
     """Verify the default SDK configuration values used by clients.
 
-    Returns:
-        None.
+    :returns: None.
     """
     # Arrange a default configuration object.
     config = Config()
@@ -34,8 +33,7 @@ def test_config_defaults() -> None:
 async def test_device_register_is_idempotent() -> None:
     """Verify repeated device registration reuses the first WDM response.
 
-    Returns:
-        None.
+    :returns: None.
     """
     # Arrange a mocked WDM registration response.
     client = WebexClient("test-token")
@@ -69,8 +67,7 @@ async def test_device_register_is_idempotent() -> None:
 def test_mercury_prepare_websocket_url() -> None:
     """Verify Mercury URL preparation preserves and adds query parameters.
 
-    Returns:
-        None.
+    :returns: None.
     """
     # Arrange a Mercury client and a URL with an existing query parameter.
     core = CoreHTTPClient("test-token", Config())
@@ -90,8 +87,7 @@ def test_mercury_prepare_websocket_url() -> None:
 def test_mercury_handler_registry() -> None:
     """Verify Mercury handler registration and removal.
 
-    Returns:
-        None.
+    :returns: None.
     """
     # Arrange an empty handler registry.
     core = CoreHTTPClient("test-token", Config())
@@ -100,11 +96,8 @@ def test_mercury_handler_registry() -> None:
     def handler(_event) -> None:
         """No-op Mercury event handler used for registry assertions.
 
-        Args:
-            _event: Ignored Mercury event argument.
-
-        Returns:
-            None.
+        :param _event: Ignored Mercury event argument.
+        :returns: None.
         """
         return None
 
@@ -119,8 +112,7 @@ def test_mercury_handler_registry() -> None:
 async def test_mercury_connect_authorizes_and_dispatches_event() -> None:
     """Verify Mercury connects, authorizes, pings, and dispatches an event.
 
-    Returns:
-        None.
+    :returns: None.
     """
     # Arrange a local websocket server that behaves like Mercury.
     received_frames: list[dict] = []
@@ -128,12 +120,9 @@ async def test_mercury_connect_authorizes_and_dispatches_event() -> None:
     async def handler(websocket, *_args):
         """Serve one Mercury-like authorization and event exchange.
 
-        Args:
-            websocket: Server-side websocket connection.
-            *_args: Additional positional arguments supplied by websockets.
-
-        Returns:
-            None.
+        :param websocket: Server-side websocket connection.
+        :param *_args: Additional positional arguments supplied by websockets.
+        :returns: None.
         """
         # Receive authorization, confirm registration, then receive the initial ping.
         auth = json.loads(await websocket.recv())
@@ -171,11 +160,8 @@ async def test_mercury_connect_authorizes_and_dispatches_event() -> None:
         async def on_activity(event) -> None:
             """Capture the first dispatched conversation activity event.
 
-            Args:
-                event: Mercury event delivered by the client dispatcher.
-
-            Returns:
-                None.
+            :param event: Mercury event delivered by the client dispatcher.
+            :returns: None.
             """
             if not event_seen.done():
                 event_seen.set_result(event)
@@ -198,8 +184,7 @@ async def test_mercury_connect_authorizes_and_dispatches_event() -> None:
 async def test_device_client_registration_callback() -> None:
     """Verify registration callbacks run immediately after registration is true.
 
-    Returns:
-        None.
+    :returns: None.
     """
     # Arrange a device client and callback event.
     core = CoreHTTPClient("test-token", Config())

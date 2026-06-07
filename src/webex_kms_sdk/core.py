@@ -21,12 +21,9 @@ class CoreHTTPClient:
     def __init__(self, access_token: str, config: Config) -> None:
         """Create the shared HTTP client used by SDK feature clients.
 
-        Args:
-            access_token: Webex bearer token used for authenticated requests.
-            config: Runtime configuration for endpoints, retries, and headers.
-
-        Returns:
-            None.
+        :param access_token: Webex bearer token used for authenticated requests.
+        :param config: Runtime configuration for endpoints, retries, and headers.
+        :returns: None.
         """
         if not access_token:
             raise ValueError("access token cannot be empty")
@@ -38,8 +35,7 @@ class CoreHTTPClient:
     async def aclose(self) -> None:
         """Close the underlying asynchronous HTTP session.
 
-        Returns:
-            None.
+        :returns: None.
         """
         log.debug("CoreHTTPClient.aclose: close HTTP session")
         await self.http.aclose()
@@ -47,11 +43,8 @@ class CoreHTTPClient:
     def auth_headers(self, extra: dict[str, str] | None = None) -> dict[str, str]:
         """Build authenticated headers for a Webex HTTP request.
 
-        Args:
-            extra: Optional request-specific headers that override defaults.
-
-        Returns:
-            Header dictionary including the bearer token and configured defaults.
+        :param extra: Optional request-specific headers that override defaults.
+        :returns: Header dictionary including the bearer token and configured defaults.
         """
         # Start with SDK-wide authentication and content defaults.
         log.debug(
@@ -79,15 +72,12 @@ class CoreHTTPClient:
     ) -> httpx.Response:
         """Send an HTTP request to a path relative to the configured base URL.
 
-        Args:
-            method: HTTP method such as ``GET`` or ``POST``.
-            path: Relative API path to append to ``Config.base_url``.
-            params: Optional query parameters.
-            json: Optional JSON-serializable request body.
-            headers: Optional request-specific headers.
-
-        Returns:
-            Raw ``httpx.Response`` returned by the API.
+        :param method: HTTP method such as ``GET`` or ``POST``.
+        :param path: Relative API path to append to ``Config.base_url``.
+        :param params: Optional query parameters.
+        :param json: Optional JSON-serializable request body.
+        :param headers: Optional request-specific headers.
+        :returns: Raw ``httpx.Response`` returned by the API.
         """
         url = f"{self.config.base_url.rstrip('/')}/{path.lstrip('/')}"
         log.debug(
@@ -109,15 +99,12 @@ class CoreHTTPClient:
     ) -> httpx.Response:
         """Send an HTTP request to an absolute URL with retry handling.
 
-        Args:
-            method: HTTP method such as ``GET`` or ``POST``.
-            url: Absolute URL to request.
-            params: Optional query parameters.
-            json: Optional JSON-serializable request body.
-            headers: Optional request-specific headers.
-
-        Returns:
-            Final ``httpx.Response`` after retry attempts are exhausted or skipped.
+        :param method: HTTP method such as ``GET`` or ``POST``.
+        :param url: Absolute URL to request.
+        :param params: Optional query parameters.
+        :param json: Optional JSON-serializable request body.
+        :param headers: Optional request-specific headers.
+        :returns: Final ``httpx.Response`` after retry attempts are exhausted or skipped.
         """
         delay = self.config.retry_base_delay or 1.0
         for attempt in range(self.config.max_retries + 1):
@@ -172,11 +159,8 @@ class CoreHTTPClient:
     async def parse_json(self, response: httpx.Response) -> Any:
         """Parse a successful JSON response or raise a typed API error.
 
-        Args:
-            response: Raw HTTP response to inspect and decode.
-
-        Returns:
-            JSON-decoded response payload.
+        :param response: Raw HTTP response to inspect and decode.
+        :returns: JSON-decoded response payload.
         """
         if response.status_code >= 400:
             log.debug(
@@ -197,13 +181,10 @@ class CoreHTTPClient:
 def _retry_delay(response: httpx.Response, base_delay: float, attempt: int) -> float:
     """Calculate the sleep interval before retrying a failed request.
 
-    Args:
-        response: Response whose status and headers may influence retry timing.
-        base_delay: Base retry delay in seconds.
-        attempt: Zero-based retry attempt number.
-
-    Returns:
-        Delay in seconds before the next attempt.
+    :param response: Response whose status and headers may influence retry timing.
+    :param base_delay: Base retry delay in seconds.
+    :param attempt: Zero-based retry attempt number.
+    :returns: Delay in seconds before the next attempt.
     """
     # Honor Retry-After for statuses where Webex can explicitly throttle callers.
     if response.status_code in {423, 429}:
@@ -234,11 +215,8 @@ def _retry_delay(response: httpx.Response, base_delay: float, attempt: int) -> f
 def _redact_for_log(value: Any) -> Any:
     """Return a redacted, compact representation suitable for debug logs.
 
-    Args:
-        value: Arbitrary value to summarize.
-
-    Returns:
-        Redacted value with sensitive fields replaced.
+    :param value: Arbitrary value to summarize.
+    :returns: Redacted value with sensitive fields replaced.
     """
     if isinstance(value, Mapping):
         return {
@@ -261,11 +239,8 @@ def _redact_for_log(value: Any) -> Any:
 def _response_preview(response: httpx.Response) -> str:
     """Return a bounded response body preview for debug logs.
 
-    Args:
-        response: HTTP response whose content should be summarized.
-
-    Returns:
-        Human-readable response body preview.
+    :param response: HTTP response whose content should be summarized.
+    :returns: Human-readable response body preview.
     """
     try:
         body = response.text
@@ -283,12 +258,9 @@ class WebexClient:
     def __init__(self, access_token: str, config: Config | None = None) -> None:
         """Create a top-level SDK client with lazily initialized sub-clients.
 
-        Args:
-            access_token: Webex bearer token used by all sub-clients.
-            config: Optional runtime configuration. Defaults are used when omitted.
-
-        Returns:
-            None.
+        :param access_token: Webex bearer token used by all sub-clients.
+        :param config: Optional runtime configuration. Defaults are used when omitted.
+        :returns: None.
         """
         log.debug("WebexClient.__init__: initialize top-level client")
         self.config = config or Config()
@@ -301,8 +273,7 @@ class WebexClient:
     async def aclose(self) -> None:
         """Close open Mercury and HTTP resources owned by the client.
 
-        Returns:
-            None.
+        :returns: None.
         """
         # Stop the websocket client before closing the shared HTTP session.
         log.debug("WebexClient.aclose: close client resources")
@@ -314,8 +285,7 @@ class WebexClient:
     def device(self):
         """Return the lazily created device registration client.
 
-        Returns:
-            Device client bound to this top-level client's core HTTP client.
+        :returns: Device client bound to this top-level client's core HTTP client.
         """
         from .device import DeviceClient
 
@@ -328,8 +298,7 @@ class WebexClient:
     def mercury(self):
         """Return the lazily created Mercury websocket client.
 
-        Returns:
-            Mercury client configured with this client's device provider.
+        :returns: Mercury client configured with this client's device provider.
         """
         from .mercury import MercuryClient
 
@@ -343,8 +312,7 @@ class WebexClient:
     def encryption(self):
         """Return the lazily created KMS encryption client.
 
-        Returns:
-            Encryption client bound to this top-level client's core HTTP client.
+        :returns: Encryption client bound to this top-level client's core HTTP client.
         """
         from .encryption import EncryptionClient
 
@@ -357,8 +325,7 @@ class WebexClient:
     def conversation(self):
         """Return the lazily created high-level conversation client.
 
-        Returns:
-            Conversation client wired to Mercury and KMS decryption.
+        :returns: Conversation client wired to Mercury and KMS decryption.
         """
         from .conversation import ConversationClient
 

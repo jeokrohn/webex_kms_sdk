@@ -28,12 +28,9 @@ class MercuryClient:
     def __init__(self, core: CoreHTTPClient, config: Config) -> None:
         """Create a Mercury client.
 
-        Args:
-            core: Shared HTTP client carrying the Webex access token.
-            config: Runtime configuration for Mercury timing and fallback URLs.
-
-        Returns:
-            None.
+        :param core: Shared HTTP client carrying the Webex access token.
+        :param config: Runtime configuration for Mercury timing and fallback URLs.
+        :returns: None.
         """
         log.debug("MercuryClient.__init__: initialize Mercury client")
         self._core = core
@@ -55,11 +52,8 @@ class MercuryClient:
     def set_device_provider(self, provider: Any) -> None:
         """Set the provider used to register devices and fetch websocket URLs.
 
-        Args:
-            provider: Object exposing ``register`` and ``get_websocket_url`` methods.
-
-        Returns:
-            None.
+        :param provider: Object exposing ``register`` and ``get_websocket_url`` methods.
+        :returns: None.
         """
         log.debug(
             "MercuryClient.set_device_provider: set device provider type=%s",
@@ -70,11 +64,8 @@ class MercuryClient:
     def set_custom_websocket_url(self, url: str) -> None:
         """Set a custom websocket URL that bypasses device registration lookup.
 
-        Args:
-            url: Mercury websocket URL to use for future connections.
-
-        Returns:
-            None.
+        :param url: Mercury websocket URL to use for future connections.
+        :returns: None.
         """
         log.debug("MercuryClient.set_custom_websocket_url: set custom websocket URL url=%s", url)
         self._custom_websocket_url = url
@@ -82,8 +73,7 @@ class MercuryClient:
     async def connect(self) -> None:
         """Connect to Mercury using a custom URL or registered device URL.
 
-        Returns:
-            None.
+        :returns: None.
         """
         # Validate and mark connection state under lock.
         log.debug("MercuryClient.connect: check connection state")
@@ -127,8 +117,7 @@ class MercuryClient:
     async def disconnect(self) -> None:
         """Disconnect Mercury and cancel background websocket tasks.
 
-        Returns:
-            None.
+        :returns: None.
         """
         # Atomically clear connection state and collect resources to close.
         log.debug("MercuryClient.disconnect: clear connection state")
@@ -156,8 +145,7 @@ class MercuryClient:
     async def listen(self) -> None:
         """Alias for ``connect`` for callers that model Mercury as a listener.
 
-        Returns:
-            None.
+        :returns: None.
         """
         log.debug("MercuryClient.listen: start listening")
         await self.connect()
@@ -165,8 +153,7 @@ class MercuryClient:
     async def stop_listening(self) -> None:
         """Alias for ``disconnect`` for listener-oriented callers.
 
-        Returns:
-            None.
+        :returns: None.
         """
         log.debug("MercuryClient.stop_listening: stop listening")
         await self.disconnect()
@@ -174,12 +161,9 @@ class MercuryClient:
     def on(self, event_type: str, handler: EventHandler) -> None:
         """Register a handler for a Mercury event type.
 
-        Args:
-            event_type: Event type such as ``conversation.activity`` or ``*``.
-            handler: Synchronous or asynchronous handler callable.
-
-        Returns:
-            None.
+        :param event_type: Event type such as ``conversation.activity`` or ``*``.
+        :param handler: Synchronous or asynchronous handler callable.
+        :returns: None.
         """
         if handler is None:
             log.debug("MercuryClient.on: skip empty handler event_type=%s", event_type)
@@ -190,12 +174,9 @@ class MercuryClient:
     def off(self, event_type: str, handler: EventHandler) -> None:
         """Remove a previously registered Mercury handler.
 
-        Args:
-            event_type: Event type whose handlers should be updated.
-            handler: Handler object to remove by identity.
-
-        Returns:
-            None.
+        :param event_type: Event type whose handlers should be updated.
+        :param handler: Handler object to remove by identity.
+        :returns: None.
         """
         log.debug("MercuryClient.off: remove event handler event_type=%s", event_type)
         handlers = self._handlers.get(event_type)
@@ -209,11 +190,8 @@ class MercuryClient:
     def clear_handlers(self, event_type: str) -> None:
         """Remove all handlers for one Mercury event type.
 
-        Args:
-            event_type: Event type to clear.
-
-        Returns:
-            None.
+        :param event_type: Event type to clear.
+        :returns: None.
         """
         log.debug("MercuryClient.clear_handlers: clear event handlers event_type=%s", event_type)
         self._handlers.pop(event_type, None)
@@ -221,8 +199,7 @@ class MercuryClient:
     def event_handlers(self) -> dict[str, list[EventHandler]]:
         """Return a copy of the registered handler mapping.
 
-        Returns:
-            Dictionary mapping event types to copied handler lists.
+        :returns: Dictionary mapping event types to copied handler lists.
         """
         log.debug(
             "MercuryClient.event_handlers: copy handler registry count=%s", len(self._handlers)
@@ -232,8 +209,7 @@ class MercuryClient:
     def is_connected(self) -> bool:
         """Return whether Mercury is currently connected.
 
-        Returns:
-            ``True`` when a websocket connection is active.
+        :returns: ``True`` when a websocket connection is active.
         """
         log.debug("MercuryClient.is_connected: read connection state result=%s", self._connected)
         return self._connected
@@ -241,11 +217,8 @@ class MercuryClient:
     def prepare_websocket_url(self, websocket_url: str) -> str:
         """Add SDK-required query parameters to a Mercury websocket URL.
 
-        Args:
-            websocket_url: Raw websocket URL returned by WDM or supplied by caller.
-
-        Returns:
-            URL with Mercury client query parameters applied.
+        :param websocket_url: Raw websocket URL returned by WDM or supplied by caller.
+        :returns: URL with Mercury client query parameters applied.
         """
         # Preserve existing query parameters while adding SDK-required Mercury flags.
         log.debug(
@@ -267,11 +240,8 @@ class MercuryClient:
     async def _connect_with_backoff(self, websocket_url: str) -> None:
         """Attempt to connect with exponential backoff.
 
-        Args:
-            websocket_url: Mercury websocket URL to connect to.
-
-        Returns:
-            None.
+        :param websocket_url: Mercury websocket URL to connect to.
+        :returns: None.
         """
         log.debug(
             "MercuryClient._connect_with_backoff: begin connection attempts url=%s", websocket_url
@@ -321,11 +291,8 @@ class MercuryClient:
     async def _attempt_connection(self, websocket_url: str) -> None:
         """Open and authenticate a single Mercury websocket connection.
 
-        Args:
-            websocket_url: Raw Mercury websocket URL.
-
-        Returns:
-            None.
+        :param websocket_url: Raw Mercury websocket URL.
+        :returns: None.
         """
         # Prepare URL and headers before opening the websocket.
         log.debug(
@@ -366,11 +333,8 @@ class MercuryClient:
     async def _authenticate_connection(self, ws: Any) -> None:
         """Send the Mercury authorization frame and wait for confirmation.
 
-        Args:
-            ws: Open websocket connection.
-
-        Returns:
-            None.
+        :param ws: Open websocket connection.
+        :returns: None.
         """
         log.debug("MercuryClient._authenticate_connection: send authorization message")
         auth_id = str(int(time.time() * 1000))
@@ -385,8 +349,7 @@ class MercuryClient:
         async def wait_for_confirmation() -> None:
             """Wait until Mercury sends a registration or buffer-state event.
 
-            Returns:
-                None.
+            :returns: None.
             """
             while True:
                 raw = await ws.recv()
@@ -431,11 +394,8 @@ class MercuryClient:
     async def _send_initial_ping(self, ws: Any) -> None:
         """Send the first ping after Mercury authorization succeeds.
 
-        Args:
-            ws: Authorized websocket connection.
-
-        Returns:
-            None.
+        :param ws: Authorized websocket connection.
+        :returns: None.
         """
         ping_message = {"id": str(int(time.time() * 1000)), "type": "ping"}
         log.debug("MercuryClient._send_initial_ping: send initial ping message=%s", ping_message)
@@ -444,8 +404,7 @@ class MercuryClient:
     async def _reader_loop(self) -> None:
         """Continuously read websocket frames and dispatch parsed events.
 
-        Returns:
-            None.
+        :returns: None.
         """
         log.debug("MercuryClient._reader_loop: start reader loop")
         try:
@@ -481,11 +440,8 @@ class MercuryClient:
     async def process_event(self, event: MercuryEvent) -> None:
         """Normalize and dispatch a Mercury event.
 
-        Args:
-            event: Mercury event to process.
-
-        Returns:
-            None.
+        :param event: Mercury event to process.
+        :returns: None.
         """
         # Refresh derived metadata in case the caller built the event manually.
         log.debug(
@@ -508,11 +464,8 @@ class MercuryClient:
     async def _handle_conversation_activity(self, event: MercuryEvent) -> None:
         """Emit message-created compatibility events for post/share activities.
 
-        Args:
-            event: Conversation activity Mercury event.
-
-        Returns:
-            None.
+        :param event: Conversation activity Mercury event.
+        :returns: None.
         """
         if event.activity_type not in {"post", "share"}:
             log.debug(
@@ -534,11 +487,8 @@ class MercuryClient:
     async def _dispatch_event(self, event: MercuryEvent) -> None:
         """Schedule handlers matching an event, activity subtype, or wildcard.
 
-        Args:
-            event: Mercury event to dispatch.
-
-        Returns:
-            None.
+        :param event: Mercury event to dispatch.
+        :returns: None.
         """
         # Merge exact, activity-specific, and wildcard handlers in dispatch order.
         handlers = list(self._handlers.get(event.event_type, []))
@@ -558,8 +508,7 @@ class MercuryClient:
     async def _ping_loop(self) -> None:
         """Send periodic ping frames while the websocket is connected.
 
-        Returns:
-            None.
+        :returns: None.
         """
         log.debug(
             "MercuryClient._ping_loop: start ping loop interval=%s",
@@ -579,8 +528,7 @@ class MercuryClient:
     async def ping(self) -> None:
         """Send one websocket ping and update observed time offset.
 
-        Returns:
-            None.
+        :returns: None.
         """
         ws = self._ws
         if ws is None:
@@ -596,11 +544,8 @@ class MercuryClient:
     async def _handle_connection_error(self, _err: Exception) -> None:
         """Handle an unexpected websocket read or ping failure.
 
-        Args:
-            _err: Connection error that triggered handling.
-
-        Returns:
-            None.
+        :param _err: Connection error that triggered handling.
+        :returns: None.
         """
         log.debug(
             "MercuryClient._handle_connection_error: handle connection error "
@@ -617,8 +562,7 @@ class MercuryClient:
     async def _start_reconnect(self) -> None:
         """Start one background reconnect task if none is already running.
 
-        Returns:
-            None.
+        :returns: None.
         """
         if self._reconnect_task is not None and not self._reconnect_task.done():
             log.debug("MercuryClient._start_reconnect: reconnect already running")
@@ -629,8 +573,7 @@ class MercuryClient:
     async def _reconnect(self) -> None:
         """Close the old websocket and reconnect with the freshest URL available.
 
-        Returns:
-            None.
+        :returns: None.
         """
         # Drop the old websocket before resolving the reconnect URL.
         log.debug("MercuryClient._reconnect: close stale websocket and resolve URL")
@@ -654,8 +597,7 @@ class MercuryClient:
     async def _get_reconnect_url(self) -> str:
         """Resolve the websocket URL to use for reconnection.
 
-        Returns:
-            Custom URL, refreshed device websocket URL, fallback URL, or empty string.
+        :returns: Custom URL, refreshed device websocket URL, fallback URL, or empty string.
         """
         if self._custom_websocket_url:
             log.debug("MercuryClient._get_reconnect_url: use custom websocket URL")
@@ -682,12 +624,9 @@ class MercuryClient:
 async def _invoke_handler(handler: EventHandler, event: MercuryEvent) -> None:
     """Invoke a Mercury handler and await it when needed.
 
-    Args:
-        handler: Handler callable to invoke.
-        event: Mercury event passed to the handler.
-
-    Returns:
-        None.
+    :param handler: Handler callable to invoke.
+    :param event: Mercury event passed to the handler.
+    :returns: None.
     """
     log.debug("_invoke_handler: invoke Mercury event handler event_type=%s", event.event_type)
     result = handler(event)
@@ -699,12 +638,9 @@ async def _invoke_handler(handler: EventHandler, event: MercuryEvent) -> None:
 async def _websockets_connect(url: str, headers: dict[str, str]) -> Any:
     """Open a websocket connection across supported websockets versions.
 
-    Args:
-        url: Websocket URL to connect to.
-        headers: Authentication and tracking headers.
-
-    Returns:
-        Open websocket connection object.
+    :param url: Websocket URL to connect to.
+    :param headers: Authentication and tracking headers.
+    :returns: Open websocket connection object.
     """
     log.debug("_websockets_connect: open websocket url=%s", url)
     try:
@@ -717,11 +653,8 @@ async def _websockets_connect(url: str, headers: dict[str, str]) -> Any:
 def _frame_preview(raw: str) -> str:
     """Return a bounded websocket frame preview for debug logs.
 
-    Args:
-        raw: Raw websocket frame text.
-
-    Returns:
-        Text preview with long frames truncated.
+    :param raw: Raw websocket frame text.
+    :returns: Text preview with long frames truncated.
     """
     if len(raw) > MAX_LOG_FRAME_LENGTH:
         return f"{raw[:MAX_LOG_FRAME_LENGTH]}...<truncated {len(raw)} chars>"

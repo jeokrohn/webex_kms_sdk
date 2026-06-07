@@ -20,12 +20,9 @@ class DeviceClient:
     def __init__(self, core: CoreHTTPClient, config: Config) -> None:
         """Create a device client.
 
-        Args:
-            core: Shared HTTP client used for WDM calls.
-            config: Runtime configuration containing WDM endpoint settings.
-
-        Returns:
-            None.
+        :param core: Shared HTTP client used for WDM calls.
+        :param config: Runtime configuration containing WDM endpoint settings.
+        :returns: None.
         """
         log.debug("DeviceClient.__init__: initialize device client")
         self._core = core
@@ -39,8 +36,7 @@ class DeviceClient:
     async def register(self) -> None:
         """Register a Webex device if one is not already available.
 
-        Returns:
-            None.
+        :returns: None.
         """
         # Mark registration in progress under lock so concurrent callers share state safely.
         log.debug("DeviceClient.register: check registration state")
@@ -120,8 +116,7 @@ class DeviceClient:
     async def unregister(self) -> None:
         """Unregister the current Webex device.
 
-        Returns:
-            None.
+        :returns: None.
         """
         # Snapshot the device to delete without holding the lock during I/O.
         log.debug("DeviceClient.unregister: read registered device state")
@@ -150,8 +145,7 @@ class DeviceClient:
     async def refresh(self) -> None:
         """Refresh the current Webex device registration from WDM.
 
-        Returns:
-            None.
+        :returns: None.
         """
         # Read the current device snapshot before making the refresh request.
         log.debug("DeviceClient.refresh: read registered device state")
@@ -193,8 +187,7 @@ class DeviceClient:
     async def get_websocket_url(self) -> str:
         """Return the Mercury websocket URL for the registered device.
 
-        Returns:
-            Websocket URL returned by WDM.
+        :returns: Websocket URL returned by WDM.
         """
         log.debug("DeviceClient.get_websocket_url: ensure registered device")
         await self._ensure_registered()
@@ -209,8 +202,7 @@ class DeviceClient:
     async def get_device_url(self) -> str:
         """Return the WDM URL for the registered device.
 
-        Returns:
-            Device resource URL.
+        :returns: Device resource URL.
         """
         log.debug("DeviceClient.get_device_url: ensure registered device")
         await self._ensure_registered()
@@ -222,8 +214,7 @@ class DeviceClient:
     async def get_user_id(self) -> str:
         """Return the Webex user ID associated with the registered device.
 
-        Returns:
-            Webex user ID from WDM.
+        :returns: Webex user ID from WDM.
         """
         log.debug("DeviceClient.get_user_id: ensure registered device")
         await self._ensure_registered()
@@ -238,8 +229,7 @@ class DeviceClient:
     async def get_device(self) -> Device:
         """Return a copy of the current registered device.
 
-        Returns:
-            Device snapshot suitable for caller inspection.
+        :returns: Device snapshot suitable for caller inspection.
         """
         log.debug("DeviceClient.get_device: ensure registered device")
         await self._ensure_registered()
@@ -251,11 +241,8 @@ class DeviceClient:
     def on_registered(self, callback: Callable[[], Any | Awaitable[Any]]) -> None:
         """Register a callback that runs after device registration succeeds.
 
-        Args:
-            callback: Synchronous or asynchronous callable with no arguments.
-
-        Returns:
-            None.
+        :param callback: Synchronous or asynchronous callable with no arguments.
+        :returns: None.
         """
         log.debug("DeviceClient.on_registered: add registration callback")
         self._callbacks.append(callback)
@@ -269,8 +256,7 @@ class DeviceClient:
     def is_registered(self) -> bool:
         """Return whether this client currently has a registered device.
 
-        Returns:
-            ``True`` when a device registration is stored locally.
+        :returns: ``True`` when a device registration is stored locally.
         """
         log.debug("DeviceClient.is_registered: read registration state result=%s", self._registered)
         return self._registered
@@ -278,11 +264,8 @@ class DeviceClient:
     async def wait_for_registration(self, timeout: float) -> None:
         """Wait for the device to become registered.
 
-        Args:
-            timeout: Maximum number of seconds to wait.
-
-        Returns:
-            None.
+        :param timeout: Maximum number of seconds to wait.
+        :returns: None.
         """
         log.debug("DeviceClient.wait_for_registration: wait for registration timeout=%s", timeout)
         if self.is_registered():
@@ -293,8 +276,7 @@ class DeviceClient:
         def mark_ready() -> None:
             """Signal that device registration completed.
 
-            Returns:
-                None.
+            :returns: None.
             """
             log.debug("DeviceClient.wait_for_registration.mark_ready: signal registration ready")
             event.set()
@@ -307,8 +289,7 @@ class DeviceClient:
     async def _ensure_registered(self) -> None:
         """Register the device on demand when needed by an accessor.
 
-        Returns:
-            None.
+        :returns: None.
         """
         # Check under lock, then perform I/O outside the lock if registration is missing.
         log.debug("DeviceClient._ensure_registered: check registered state")

@@ -31,11 +31,8 @@ from webex_kms_sdk.encryption import (
 def b64url(data: bytes) -> str:
     """Encode bytes as unpadded base64url text for test JWK values.
 
-    Args:
-        data: Bytes to encode.
-
-    Returns:
-        Base64url string without padding.
+    :param data: Bytes to encode.
+    :returns: Base64url string without padding.
     """
     return base64.urlsafe_b64encode(data).decode("ascii").rstrip("=")
 
@@ -43,8 +40,7 @@ def b64url(data: bytes) -> str:
 def test_jwk_symmetric_key() -> None:
     """Verify octet JWK values decode to symmetric key bytes.
 
-    Returns:
-        None.
+    :returns: None.
     """
     # Arrange a random symmetric key encoded into an octet JWK.
     raw_key = os.urandom(32)
@@ -57,8 +53,7 @@ def test_jwk_symmetric_key() -> None:
 def test_parse_kms_uri_and_cluster_helpers() -> None:
     """Verify KMS URI parsing and cluster inference helpers.
 
-    Returns:
-        None.
+    :returns: None.
     """
     # Assert valid KMS URIs split into domain and path.
     assert parse_kms_uri("kms://ciscospark.com/keys/abc") == ("ciscospark.com", "keys/abc")
@@ -77,8 +72,7 @@ def test_parse_kms_uri_and_cluster_helpers() -> None:
 def test_wrap_unwrap_with_shared_secret() -> None:
     """Verify direct shared-secret JWE wrapping round-trips payload bytes.
 
-    Returns:
-        None.
+    :returns: None.
     """
     from webex_kms_sdk.encryption import unwrap_with_shared_secret
 
@@ -95,8 +89,7 @@ def test_wrap_unwrap_with_shared_secret() -> None:
 def test_ecdh_shared_secret_derivation() -> None:
     """Verify client and server ECDH material derive the same shared secret.
 
-    Returns:
-        None.
+    :returns: None.
     """
     # Arrange matching client/server EC keypairs and a KMS-like response.
     client_private = ec.generate_private_key(ec.SECP256R1())
@@ -122,8 +115,7 @@ def test_ecdh_shared_secret_derivation() -> None:
 def test_parse_rsa_public_key_from_jwk_and_jwks() -> None:
     """Verify RSA public keys parse from JWK and JWKS shapes.
 
-    Returns:
-        None.
+    :returns: None.
     """
     # Arrange an RSA JWK from generated public key numbers.
     private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
@@ -149,8 +141,7 @@ def test_parse_rsa_public_key_from_jwk_and_jwks() -> None:
 def test_process_kms_messages_caches_key() -> None:
     """Verify processed KMS messages cache returned key material.
 
-    Returns:
-        None.
+    :returns: None.
     """
     # Arrange an encryption client with an active ECDH context.
     client = WebexClient("test-token")
@@ -183,8 +174,7 @@ def test_process_kms_messages_caches_key() -> None:
 async def test_decrypt_text_with_cached_key() -> None:
     """Verify text decryption uses a cached KMS key.
 
-    Returns:
-        None.
+    :returns: None.
     """
     # Arrange cached key material and matching ciphertext.
     client = WebexClient("test-token")
@@ -203,8 +193,7 @@ async def test_decrypt_text_with_cached_key() -> None:
 async def test_get_key_synchronous_kms_response() -> None:
     """Verify synchronous HTTP KMS responses return retrieved keys.
 
-    Returns:
-        None.
+    :returns: None.
     """
     # Arrange a client with pre-established ECDH context and mocked KMS endpoint.
     client = WebexClient("test-token", Config())
@@ -243,8 +232,7 @@ async def test_get_key_synchronous_kms_response() -> None:
 async def test_get_key_async_mercury_response() -> None:
     """Verify async Mercury KMS responses complete pending key retrieval.
 
-    Returns:
-        None.
+    :returns: None.
     """
     # Arrange a client where the KMS HTTP endpoint accepts async delivery.
     client = WebexClient("test-token", Config(kms_response_timeout=1.0))
@@ -288,8 +276,7 @@ async def test_get_key_async_mercury_response() -> None:
 def test_generate_request_id_is_unique() -> None:
     """Verify generated KMS request IDs are not reused.
 
-    Returns:
-        None.
+    :returns: None.
     """
     # Assert two random request IDs differ.
     assert generate_request_id() != generate_request_id()
