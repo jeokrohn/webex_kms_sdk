@@ -159,9 +159,7 @@ def test_process_kms_messages_caches_key() -> None:
         "jwk": {"kty": "oct", "k": b64url(os.urandom(32)), "kid": "kid-1"},
     }
     # Wrap a KMS key response with the shared ECDH secret.
-    wrapped = wrap_with_shared_secret(
-        json.dumps({"status": 200, "key": key}).encode(), shared_secret
-    )
+    wrapped = wrap_with_shared_secret(json.dumps({"status": 200, "key": key}).encode(), shared_secret)
 
     # Act by processing the KMS response as if it arrived from Mercury.
     encryption.process_kms_messages([wrapped])
@@ -211,9 +209,7 @@ async def test_get_key_synchronous_kms_response() -> None:
         "uri": "kms://ciscospark.com/keys/sync",
         "jwk": {"kty": "oct", "k": b64url(os.urandom(32)), "kid": "sync"},
     }
-    response_jwe = wrap_with_shared_secret(
-        json.dumps({"status": 200, "key": key}).encode(), shared_secret
-    )
+    response_jwe = wrap_with_shared_secret(json.dumps({"status": 200, "key": key}).encode(), shared_secret)
     respx.post(re.compile(r"https://encryption-a\.wbx2\.com/encryption/api/v1/kms/messages")).mock(
         return_value=httpx.Response(200, json={"kmsMessages": [response_jwe]})
     )

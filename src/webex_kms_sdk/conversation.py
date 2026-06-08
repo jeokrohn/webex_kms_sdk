@@ -177,8 +177,7 @@ class ConversationClient:
             if isinstance(nested, list):
                 kms_messages = nested
                 log.debug(
-                    "ConversationClient.process_event_kms_messages: found nested KMS "
-                    "messages count=%s",
+                    "ConversationClient.process_event_kms_messages: found nested KMS messages count=%s",
                     len(kms_messages),
                 )
 
@@ -188,8 +187,7 @@ class ConversationClient:
             if isinstance(dotted, list):
                 kms_messages = dotted
                 log.debug(
-                    "ConversationClient.process_event_kms_messages: found dotted KMS "
-                    "messages count=%s",
+                    "ConversationClient.process_event_kms_messages: found dotted KMS messages count=%s",
                     len(kms_messages),
                 )
 
@@ -198,8 +196,7 @@ class ConversationClient:
             if isinstance(direct, list):
                 kms_messages = direct
                 log.debug(
-                    "ConversationClient.process_event_kms_messages: found direct KMS "
-                    "messages count=%s",
+                    "ConversationClient.process_event_kms_messages: found direct KMS messages count=%s",
                     len(kms_messages),
                 )
 
@@ -209,15 +206,11 @@ class ConversationClient:
                 parsed = json.loads(encryption_data)
             except json.JSONDecodeError:
                 parsed = {}
-                log.debug(
-                    "ConversationClient.process_event_kms_messages: serialized encryption "
-                    "parse failed"
-                )
+                log.debug("ConversationClient.process_event_kms_messages: serialized encryption parse failed")
             if isinstance(parsed, dict) and isinstance(parsed.get("kmsMessages"), list):
                 kms_messages = parsed["kmsMessages"]
                 log.debug(
-                    "ConversationClient.process_event_kms_messages: found serialized KMS "
-                    "messages count=%s",
+                    "ConversationClient.process_event_kms_messages: found serialized KMS messages count=%s",
                     len(kms_messages),
                 )
 
@@ -261,14 +254,10 @@ class ConversationClient:
         :returns: None.
         """
         # The Mercury device provider is intentionally optional for custom websocket URLs.
-        log.debug(
-            "ConversationClient._wire_encryption_device_info: inspect Mercury device provider"
-        )
+        log.debug("ConversationClient._wire_encryption_device_info: inspect Mercury device provider")
         provider = getattr(self._mercury, "_device_provider", None)
         if provider is None:
-            log.debug(
-                "ConversationClient._wire_encryption_device_info: no device provider available"
-            )
+            log.debug("ConversationClient._wire_encryption_device_info: no device provider available")
             return
         try:
             # Register first so device URL and user ID accessors are populated.
@@ -331,8 +320,7 @@ class ConversationClient:
         handlers = list(self._handlers.get(activity.verb, []))
         handlers.extend(self._handlers.get(WILDCARD_HANDLER, []))
         log.debug(
-            "ConversationClient._dispatch_activity: schedule activity handlers activity_id=%s "
-            "verb=%s count=%s",
+            "ConversationClient._dispatch_activity: schedule activity handlers activity_id=%s verb=%s count=%s",
             activity.id,
             activity.verb,
             len(handlers),
@@ -349,8 +337,7 @@ class ConversationClient:
         """
         # Populate message content before user code observes post/share activities.
         log.debug(
-            "ConversationClient._invoke_activity_handler: invoke activity handler activity_id=%s "
-            "verb=%s",
+            "ConversationClient._invoke_activity_handler: invoke activity handler activity_id=%s verb=%s",
             activity.id,
             activity.verb,
         )
@@ -383,8 +370,7 @@ class ConversationClient:
         if activity.encryption_key_url:
             try:
                 log.debug(
-                    "ConversationClient._process_message_content: decrypt message content "
-                    "key_uri=%s",
+                    "ConversationClient._process_message_content: decrypt message content key_uri=%s",
                     activity.encryption_key_url,
                 )
                 activity.content = await self._encryption.decrypt_message_content(

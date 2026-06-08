@@ -56,10 +56,7 @@ async def test_device_register_is_idempotent() -> None:
     # Assert only one network call happened and accessors return normalized values.
     assert route.call_count == 1
     assert await client.device.get_websocket_url() == "wss://mercury.example.test/device-123"
-    assert (
-        await client.device.get_device_url()
-        == "https://wdm-a.wbx2.com/wdm/api/v1/devices/device-123"
-    )
+    assert await client.device.get_device_url() == "https://wdm-a.wbx2.com/wdm/api/v1/devices/device-123"
     assert await client.device.get_user_id() == "user-123"
     await client.aclose()
 

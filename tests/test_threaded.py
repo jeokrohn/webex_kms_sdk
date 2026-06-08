@@ -3,17 +3,21 @@ from __future__ import annotations
 import asyncio
 import base64
 import json
+import logging
 import os
 import re
 import threading
 import time
+from pathlib import Path
 from typing import Any
+from unittest import TestCase
 
 import httpx
 import pytest
 import respx
 import websockets
 from cryptography.hazmat.primitives.asymmetric import ec
+from dotenv import load_dotenv
 
 import webex_kms_sdk.threaded as threaded_module
 from webex_kms_sdk import JWK, Config, Key, ThreadedWebexClient
@@ -289,9 +293,9 @@ async def test_threaded_client_get_key_completes_from_mercury_response() -> None
                 },
             )
         )
-        respx.post(
-            re.compile(r"https://encryption-a\.wbx2\.com/encryption/api/v1/kms/messages")
-        ).mock(return_value=httpx.Response(202))
+        respx.post(re.compile(r"https://encryption-a\.wbx2\.com/encryption/api/v1/kms/messages")).mock(
+            return_value=httpx.Response(202)
+        )
 
         try:
             await asyncio.to_thread(client.connect)
@@ -312,9 +316,7 @@ async def test_threaded_client_get_key_completes_from_mercury_response() -> None
                 )
 
             await asyncio.to_thread(client._run, seed_ecdh_context())
-            key_task = asyncio.create_task(
-                asyncio.to_thread(client.get_key, "kms://ciscospark.com/keys/threaded")
-            )
+            key_task = asyncio.create_task(asyncio.to_thread(client.get_key, "kms://ciscospark.com/keys/threaded"))
 
             request_id = ""
             for _ in range(100):
@@ -349,3 +351,15 @@ async def test_threaded_client_get_key_completes_from_mercury_response() -> None
             assert result.jwk.kid == "threaded"
         finally:
             await asyncio.to_thread(client.close)
+
+
+class TestGetKey(TestCase):
+    def test_get_key(self) -> None:
+        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s %(levelname)-8s %(name)s: %(message)s", force=True)
+        load_dotenv(Path(__file__).parent.parent / ".env")
+        kms_uri = "kms://kms-aore.wbx2.com/keys/c6a14801-8188-431e-af37-0ba0183c59d5"
+        with ThreadedWebexClient(os.getenv("WEBEX_ACCESS_TOKEN")) as client:
+            logging.info(f"get key KMS URI: {kms_uri}")
+            key = client.get_key(kms_uri)
+            logging.info(f"got key KMS URI: {kms_uri}m {key=}")
+            print(f"{key=}")

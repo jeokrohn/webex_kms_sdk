@@ -91,9 +91,7 @@ class MercuryClient:
         try:
             # Prefer an explicit websocket URL when callers provide one.
             if custom_url:
-                log.debug(
-                    "MercuryClient.connect: connect with custom websocket URL url=%s", custom_url
-                )
+                log.debug("MercuryClient.connect: connect with custom websocket URL url=%s", custom_url)
                 await self._connect_with_backoff(custom_url)
                 return
             if device_provider is None:
@@ -104,9 +102,7 @@ class MercuryClient:
             websocket_url = await device_provider.get_websocket_url()
             if not websocket_url:
                 raise RuntimeError("device provider returned empty WebSocket URL")
-            log.debug(
-                "MercuryClient.connect: connect with device websocket URL url=%s", websocket_url
-            )
+            log.debug("MercuryClient.connect: connect with device websocket URL url=%s", websocket_url)
             await self._connect_with_backoff(websocket_url)
         except Exception:
             async with self._lock:
@@ -201,9 +197,7 @@ class MercuryClient:
 
         :returns: Dictionary mapping event types to copied handler lists.
         """
-        log.debug(
-            "MercuryClient.event_handlers: copy handler registry count=%s", len(self._handlers)
-        )
+        log.debug("MercuryClient.event_handlers: copy handler registry count=%s", len(self._handlers))
         return {key: list(value) for key, value in self._handlers.items()}
 
     def is_connected(self) -> bool:
@@ -243,9 +237,7 @@ class MercuryClient:
         :param websocket_url: Mercury websocket URL to connect to.
         :returns: None.
         """
-        log.debug(
-            "MercuryClient._connect_with_backoff: begin connection attempts url=%s", websocket_url
-        )
+        log.debug("MercuryClient._connect_with_backoff: begin connection attempts url=%s", websocket_url)
         retry_count = 0
         current_backoff = self._config.mercury_backoff_time_reset
         max_retries = (
@@ -295,9 +287,7 @@ class MercuryClient:
         :returns: None.
         """
         # Prepare URL and headers before opening the websocket.
-        log.debug(
-            "MercuryClient._attempt_connection: prepare websocket request url=%s", websocket_url
-        )
+        log.debug("MercuryClient._attempt_connection: prepare websocket request url=%s", websocket_url)
         prepared_url = self.prepare_websocket_url(websocket_url)
         headers = {
             "Authorization": f"Bearer {self._core.access_token}",
@@ -363,10 +353,7 @@ class MercuryClient:
                 try:
                     event = json.loads(raw)
                 except json.JSONDecodeError:
-                    log.debug(
-                        "MercuryClient._authenticate_connection.wait_for_confirmation: "
-                        "skip invalid JSON"
-                    )
+                    log.debug("MercuryClient._authenticate_connection.wait_for_confirmation: skip invalid JSON")
                     continue
 
                 data = event.get("data") if isinstance(event, dict) else None
@@ -383,8 +370,7 @@ class MercuryClient:
                         return
                 if isinstance(event, dict) and event.get("type") == "error":
                     log.debug(
-                        "MercuryClient._authenticate_connection.wait_for_confirmation: "
-                        "authorization error response=%s",
+                        "MercuryClient._authenticate_connection.wait_for_confirmation: authorization error response=%s",
                         event,
                     )
                     raise RuntimeError(f"authorization failed: {event}")
@@ -452,9 +438,7 @@ class MercuryClient:
         event.apply_header_overrides()
         event.extract_metadata()
         if event.event_type in {"mercury.buffer_state", "mercury.registration_status"}:
-            log.debug(
-                "MercuryClient.process_event: skip Mercury state event type=%s", event.event_type
-            )
+            log.debug("MercuryClient.process_event: skip Mercury state event type=%s", event.event_type)
             return
         # Conversation post/share events also fan out as message.created.
         if event.event_type == "conversation.activity":
@@ -477,8 +461,7 @@ class MercuryClient:
         message_event = MercuryEvent(**{field: getattr(event, field) for field in event.__slots__})
         message_event.event_type = "message.created"
         log.debug(
-            "MercuryClient._handle_conversation_activity: schedule message.created "
-            "handlers count=%s",
+            "MercuryClient._handle_conversation_activity: schedule message.created handlers count=%s",
             len(self._handlers.get("message.created", [])),
         )
         for handler in list(self._handlers.get("message.created", [])):
@@ -496,8 +479,7 @@ class MercuryClient:
             handlers.extend(self._handlers.get(f"activity:{event.activity_type}", []))
         handlers.extend(self._handlers.get("*", []))
         log.debug(
-            "MercuryClient._dispatch_event: schedule event handlers event_type=%s "
-            "activity_type=%s count=%s",
+            "MercuryClient._dispatch_event: schedule event handlers event_type=%s activity_type=%s count=%s",
             event.event_type,
             event.activity_type,
             len(handlers),
@@ -548,8 +530,7 @@ class MercuryClient:
         :returns: None.
         """
         log.debug(
-            "MercuryClient._handle_connection_error: handle connection error "
-            "connected=%s closing=%s",
+            "MercuryClient._handle_connection_error: handle connection error connected=%s closing=%s",
             self._connected,
             self._closing,
         )

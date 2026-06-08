@@ -23,9 +23,7 @@ from .models import JWK, Key, KMSMessage
 
 KMS_URI_PREFIX = "kms://"
 ECDH_TTL_SECONDS = 60 * 60
-UUID_RE = re.compile(
-    r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
-)
+UUID_RE = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 
 log = logging.getLogger(__name__)
 
@@ -89,8 +87,7 @@ class EncryptionClient:
         :returns: None.
         """
         log.debug(
-            "EncryptionClient.set_device_info: set KMS device info device_url=%s "
-            "user_id_present=%s",
+            "EncryptionClient.set_device_info: set KMS device info device_url=%s user_id_present=%s",
             device_url,
             bool(user_id),
         )
@@ -118,15 +115,11 @@ class EncryptionClient:
         async with self._inflight_lock:
             task = self._inflight_keys.get(key_uri)
             if task is None:
-                log.debug(
-                    "EncryptionClient.get_key: create inflight retrieval task key_uri=%s", key_uri
-                )
+                log.debug("EncryptionClient.get_key: create inflight retrieval task key_uri=%s", key_uri)
                 task = asyncio.create_task(self._retrieve_and_cache_key(key_uri))
                 self._inflight_keys[key_uri] = task
             else:
-                log.debug(
-                    "EncryptionClient.get_key: join inflight retrieval task key_uri=%s", key_uri
-                )
+                log.debug("EncryptionClient.get_key: join inflight retrieval task key_uri=%s", key_uri)
 
         try:
             return await task
@@ -199,10 +192,7 @@ class EncryptionClient:
             if plaintext is None and message.count(".") == 4:
                 if ecdh_context is not None:
                     try:
-                        log.debug(
-                            "EncryptionClient.process_kms_messages: decrypt with active "
-                            "ECDH context"
-                        )
+                        log.debug("EncryptionClient.process_kms_messages: decrypt with active ECDH context")
                         plaintext = unwrap_with_shared_secret(message, ecdh_context.shared_secret)
                     except Exception:
                         log.debug(
@@ -216,16 +206,12 @@ class EncryptionClient:
                         if private_key is None:
                             continue
                         try:
-                            log.debug(
-                                "EncryptionClient.process_kms_messages: decrypt with pending "
-                                "ECDH key"
-                            )
+                            log.debug("EncryptionClient.process_kms_messages: decrypt with pending ECDH key")
                             plaintext = _decrypt_ecdh_jwe(message, private_key)
                             break
                         except Exception:
                             log.debug(
-                                "EncryptionClient.process_kms_messages: pending ECDH "
-                                "decrypt failed",
+                                "EncryptionClient.process_kms_messages: pending ECDH decrypt failed",
                                 exc_info=True,
                             )
                             continue
@@ -253,8 +239,7 @@ class EncryptionClient:
             # Resolve pending asynchronous requests before caching broadcast keys.
             if kms_message.request_id:
                 log.debug(
-                    "EncryptionClient.process_kms_messages: match pending KMS request "
-                    "request_id=%s",
+                    "EncryptionClient.process_kms_messages: match pending KMS request request_id=%s",
                     kms_message.request_id,
                 )
                 pending = self._pending_requests.pop(kms_message.request_id, None)
@@ -304,8 +289,7 @@ class EncryptionClient:
         if not encrypted_content:
             raise ValueError("encrypted content is required")
         log.debug(
-            "EncryptionClient.decrypt_message_content: decrypt message content key_uri=%s "
-            "content_length=%s",
+            "EncryptionClient.decrypt_message_content: decrypt message content key_uri=%s content_length=%s",
             encryption_key_url,
             len(encrypted_content),
         )
@@ -365,22 +349,17 @@ class EncryptionClient:
                 try:
                     return await self._do_kms_retrieve(key_uri, retry_context)
                 except Exception as retry_err:
-                    raise KMSProtocolError(
-                        f"retry KMS retrieve failed: {retry_err} (original: {err})"
-                    ) from retry_err
+                    raise KMSProtocolError(f"retry KMS retrieve failed: {retry_err} (original: {err})") from retry_err
 
             try:
                 # Non-session failures get one retry against the same context for transient errors.
                 log.debug(
-                    "EncryptionClient._retrieve_key_via_ecdh: retry KMS retrieve with "
-                    "same ECDH context",
+                    "EncryptionClient._retrieve_key_via_ecdh: retry KMS retrieve with same ECDH context",
                     exc_info=True,
                 )
                 return await self._do_kms_retrieve(key_uri, ecdh_context)
             except Exception as retry_err:
-                raise KMSProtocolError(
-                    f"retry KMS retrieve failed: {retry_err} (original: {err})"
-                ) from retry_err
+                raise KMSProtocolError(f"retry KMS retrieve failed: {retry_err} (original: {err})") from retry_err
 
     async def _do_kms_retrieve(self, key_uri: str, ecdh_context: ECDHContext) -> Key:
         """Send one retrieve request through an established ECDH context.
@@ -399,8 +378,7 @@ class EncryptionClient:
         domain, _ = parse_kms_uri(key_uri)
         destination = kms_cluster_from_domain(domain, ecdh_context.kms_cluster)
         log.debug(
-            "EncryptionClient._do_kms_retrieve: build KMS retrieve request request_id=%s "
-            "destination=%s domain=%s",
+            "EncryptionClient._do_kms_retrieve: build KMS retrieve request request_id=%s destination=%s domain=%s",
             request_id,
             destination,
             domain,
@@ -434,8 +412,7 @@ class EncryptionClient:
             # A 200 response carries KMS replies synchronously in the HTTP response.
             if response_jwes:
                 log.debug(
-                    "EncryptionClient._do_kms_retrieve: process synchronous KMS response "
-                    "request_id=%s count=%s",
+                    "EncryptionClient._do_kms_retrieve: process synchronous KMS response request_id=%s count=%s",
                     request_id,
                     len(response_jwes),
                 )
@@ -443,8 +420,7 @@ class EncryptionClient:
 
             # A 202 response means the reply will arrive later over Mercury.
             log.debug(
-                "EncryptionClient._do_kms_retrieve: await Mercury KMS response "
-                "request_id=%s timeout=%s",
+                "EncryptionClient._do_kms_retrieve: await Mercury KMS response request_id=%s timeout=%s",
                 request_id,
                 self._config.kms_response_timeout,
             )
@@ -468,8 +444,7 @@ class EncryptionClient:
                 # Reuse the cached context until its TTL expires.
                 if time.time() - self._ecdh_context.created_at < ECDH_TTL_SECONDS:
                     log.debug(
-                        "EncryptionClient._get_or_create_ecdh: reuse cached ECDH "
-                        "context key_uri=%s",
+                        "EncryptionClient._get_or_create_ecdh: reuse cached ECDH context key_uri=%s",
                         self._ecdh_context.ecdh_key_uri,
                     )
                     return self._ecdh_context
@@ -503,8 +478,7 @@ class EncryptionClient:
         local_private_key = ec.generate_private_key(ec.SECP256R1())
         # Ask KMS to create the remote ECDH key and derive the shared secret.
         log.debug(
-            "EncryptionClient._perform_ecdh_exchange: send ECDH create request "
-            "cluster=%s rsa_kid=%s",
+            "EncryptionClient._perform_ecdh_exchange: send ECDH create request cluster=%s rsa_kid=%s",
             kms_info.kms_cluster,
             rsa_kid,
         )
@@ -550,8 +524,7 @@ class EncryptionClient:
         """
         # Register the request with the EC private key for possible async response decryption.
         log.debug(
-            "EncryptionClient._send_ecdh_request: prepare ECDH create request "
-            "cluster=%s rsa_kid=%s",
+            "EncryptionClient._send_ecdh_request: prepare ECDH create request cluster=%s rsa_kid=%s",
             cluster,
             rsa_kid,
         )
@@ -591,8 +564,7 @@ class EncryptionClient:
             # Process synchronous HTTP replies immediately.
             if response_jwes:
                 log.debug(
-                    "EncryptionClient._send_ecdh_request: process synchronous ECDH response "
-                    "request_id=%s count=%s",
+                    "EncryptionClient._send_ecdh_request: process synchronous ECDH response request_id=%s count=%s",
                     request_id,
                     len(response_jwes),
                 )
@@ -600,8 +572,7 @@ class EncryptionClient:
 
             # Await asynchronous Mercury delivery for accepted requests.
             log.debug(
-                "EncryptionClient._send_ecdh_request: await Mercury ECDH response request_id=%s "
-                "timeout=%s",
+                "EncryptionClient._send_ecdh_request: await Mercury ECDH response request_id=%s timeout=%s",
                 request_id,
                 self._config.kms_response_timeout,
             )
@@ -612,8 +583,7 @@ class EncryptionClient:
             return KMSMessage.from_dict(parsed)
         finally:
             log.debug(
-                "EncryptionClient._send_ecdh_request: unregister pending ECDH "
-                "request request_id=%s",
+                "EncryptionClient._send_ecdh_request: unregister pending ECDH request request_id=%s",
                 request_id,
             )
             self._unregister_pending_request(request_id)
@@ -673,8 +643,7 @@ class EncryptionClient:
         data = response.json()
         # Preserve the raw RSA field because KMS may return either JWK or JWKS shape.
         log.debug(
-            "EncryptionClient._get_kms_info: receive KMS info API response "
-            "cluster=%s rsa_present=%s",
+            "EncryptionClient._get_kms_info: receive KMS info API response cluster=%s rsa_present=%s",
             data.get("kmsCluster") if isinstance(data, dict) else "",
             bool(data.get("rsaPublicKey")) if isinstance(data, dict) else False,
         )
@@ -694,22 +663,16 @@ class EncryptionClient:
         envelope: dict[str, Any] = {"kmsMessages": [wrapped_message]}
         if destination:
             envelope["destination"] = destination
-        url = (
-            f"https://encryption-{self._config.kms_default_cluster}.wbx2.com"
-            "/encryption/api/v1/kms/messages"
-        )
+        url = f"https://encryption-{self._config.kms_default_cluster}.wbx2.com/encryption/api/v1/kms/messages"
         log.debug(
-            "EncryptionClient._send_kms_message: send KMS API message url=%s destination=%s "
-            "message_length=%s",
+            "EncryptionClient._send_kms_message: send KMS API message url=%s destination=%s message_length=%s",
             url,
             destination,
             len(wrapped_message),
         )
         response = await self._core.request_url("POST", url, json=envelope)
         if response.status_code == 202:
-            log.debug(
-                "EncryptionClient._send_kms_message: KMS API accepted async response status=202"
-            )
+            log.debug("EncryptionClient._send_kms_message: KMS API accepted async response status=202")
             return None
         if response.status_code != 200:
             log.debug(
@@ -717,9 +680,7 @@ class EncryptionClient:
                 response.status_code,
                 response.text,
             )
-            raise KMSProtocolError(
-                f"KMS request failed with status {response.status_code}: {response.text}"
-            )
+            raise KMSProtocolError(f"KMS request failed with status {response.status_code}: {response.text}")
         data = response.json()
         # Normalize response message values to strings for downstream decrypt helpers.
         response_messages = [str(value) for value in data.get("kmsMessages") or []]
@@ -759,15 +720,12 @@ class EncryptionClient:
         :returns: None.
         """
         log.debug(
-            "EncryptionClient._unregister_pending_request: unregister pending KMS "
-            "request request_id=%s",
+            "EncryptionClient._unregister_pending_request: unregister pending KMS request request_id=%s",
             request_id,
         )
         self._pending_requests.pop(request_id, None)
 
-    def _process_key_response_jwes(
-        self, response_jwes: list[str], ecdh_context: ECDHContext
-    ) -> Key:
+    def _process_key_response_jwes(self, response_jwes: list[str], ecdh_context: ECDHContext) -> Key:
         """Decrypt synchronous key response JWEs and parse the first valid key.
 
         :param response_jwes: Compact JWE responses returned by KMS.
@@ -784,8 +742,7 @@ class EncryptionClient:
                 payload = unwrap_with_shared_secret(response_jwe, ecdh_context.shared_secret)
             except Exception:
                 log.debug(
-                    "EncryptionClient._process_key_response_jwes: skip undecryptable "
-                    "KMS response JWE",
+                    "EncryptionClient._process_key_response_jwes: skip undecryptable KMS response JWE",
                     exc_info=True,
                 )
                 continue
@@ -921,8 +878,7 @@ def generate_request_id() -> str:
     """
     data = os.urandom(16)
     request_id = (
-        f"go-sdk-{data[0:4].hex()}-{data[4:6].hex()}-{data[6:8].hex()}-"
-        f"{data[8:10].hex()}-{data[10:16].hex()}"
+        f"python-sdk-{data[0:4].hex()}-{data[4:6].hex()}-{data[6:8].hex()}-{data[8:10].hex()}-{data[10:16].hex()}"
     )
     log.debug("generate_request_id: generate KMS request ID request_id=%s", request_id)
     return request_id
@@ -965,7 +921,7 @@ def wrap_with_shared_secret(payload: bytes, shared_secret: bytes, kid: str = "")
     protected = {"alg": "dir", "enc": "A256GCM"}
     if kid:
         protected["kid"] = kid
-    token = jwe.JWE(payload, protected=protected)
+    token = jwe.JWE(payload, protected=protected)  # type: ignore[arg-type]
     token.add_recipient(key)
     wrapped = token.serialize(compact=True)
     log.debug("wrap_with_shared_secret: wrapped payload length=%s", len(wrapped))
@@ -998,9 +954,7 @@ def wrap_with_rsa(payload: bytes, rsa_public_key: rsa.RSAPublicKey, kid: str = "
     :returns: Compact serialized JWE string.
     """
     # Convert cryptography RSA numbers into the JWK shape expected by jwcrypto.
-    log.debug(
-        "wrap_with_rsa: wrap payload with RSA bytes=%s kid_present=%s", len(payload), bool(kid)
-    )
+    log.debug("wrap_with_rsa: wrap payload with RSA bytes=%s kid_present=%s", len(payload), bool(kid))
     public_numbers = rsa_public_key.public_numbers()
     key = jose_jwk.JWK(
         kty="RSA",
@@ -1010,7 +964,7 @@ def wrap_with_rsa(payload: bytes, rsa_public_key: rsa.RSAPublicKey, kid: str = "
     protected = {"alg": "RSA-OAEP", "enc": "A256GCM"}
     if kid:
         protected["kid"] = kid
-    token = jwe.JWE(payload, protected=protected)
+    token = jwe.JWE(payload, protected=protected)  # type: ignore[arg-type]
     token.add_recipient(key)
     wrapped = token.serialize(compact=True)
     log.debug("wrap_with_rsa: wrapped payload length=%s", len(wrapped))
@@ -1123,9 +1077,7 @@ def parse_rsa_public_key_from_json(raw: Any) -> tuple[rsa.RSAPublicKey, str]:
     :param raw: KMS RSA public key field as a dictionary, JSON string, or JWKS dictionary.
     :returns: Tuple of RSA public key object and key ID.
     """
-    log.debug(
-        "parse_rsa_public_key_from_json: parse KMS RSA public key type=%s", type(raw).__name__
-    )
+    log.debug("parse_rsa_public_key_from_json: parse KMS RSA public key type=%s", type(raw).__name__)
     candidate = raw
     # KMS may return the RSA key field as a serialized JSON string.
     if isinstance(candidate, str):
@@ -1211,10 +1163,7 @@ def _is_ecdh_session_error(err: BaseException) -> bool:
     :returns: ``True`` when the error message matches known session-failure markers.
     """
     message = str(err)
-    result = any(
-        marker in message
-        for marker in ("status 400", "status 403", "error decrypting", "failed with status")
-    )
+    result = any(marker in message for marker in ("status 400", "status 403", "error decrypting", "failed with status"))
     log.debug("_is_ecdh_session_error: classify ECDH error result=%s message=%s", result, message)
     return result
 

@@ -4,6 +4,8 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any
 
+from jwcrypto import jwk
+
 log = logging.getLogger(__name__)
 
 
@@ -40,8 +42,7 @@ class Device:
         :returns: Normalized ``Device`` instance.
         """
         log.debug(
-            "Device.from_dict: parse API device response url=%s websocket_present=%s "
-            "etag_present=%s",
+            "Device.from_dict: parse API device response url=%s websocket_present=%s etag_present=%s",
             data.get("url"),
             bool(data.get("webSocketUrl")),
             bool(etag),
@@ -241,6 +242,10 @@ class JWK:
         if not self.k:
             raise ValueError("symmetric key value (k) is empty")
         return _b64url_decode(self.k)
+
+    def jwcrypto_key(self) -> jwk.JWK:
+        """Get a jwcrypto JWK object."""
+        return jwk.JWK(**self.to_dict())
 
 
 @dataclass(slots=True)

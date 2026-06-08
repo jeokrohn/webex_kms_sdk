@@ -1029,6 +1029,18 @@ wheels = [
 ]
 
 [[package]]
+name = "types-jwcrypto"
+version = "1.5.7.20260518"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "cryptography" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/24/10/69410365c8e5d5f380ff90dbc7c5e57a07e7f3c8ccce33695806703fee9b/types_jwcrypto-1.5.7.20260518.tar.gz", hash = "sha256:44df0b55520a7ce88e6577f2331e79c9ba7ac2a74e4c8b4552a7f33eccd6c012", size = 12118, upload-time = "2026-05-18T06:06:33.266Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5a/79/be24dfed6892200303dac0e504ffb69a2261103dfe214b9208548b655066/types_jwcrypto-1.5.7.20260518-py3-none-any.whl", hash = "sha256:d3db816621990229940823b7c83b3a95093cabfd9e4f4f596761312e00256972", size = 13348, upload-time = "2026-05-18T06:06:32.018Z" },
+]
+
+[[package]]
 name = "typing-extensions"
 version = "4.15.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1082,6 +1094,7 @@ dev = [
     { name = "respx" },
     { name = "ruff" },
     { name = "twine" },
+    { name = "types-jwcrypto" },
 ]
 
 [package.metadata]
@@ -1102,6 +1115,7 @@ dev = [
     { name = "respx", specifier = ">=0.21.0" },
     { name = "ruff", specifier = ">=0.8.0" },
     { name = "twine", specifier = ">=6.1.0" },
+    { name = "types-jwcrypto", specifier = ">=1.5.7.20260518" },
 ]
 
 [[package]]

@@ -135,9 +135,7 @@ class DeviceClient:
                 response.text,
             )
             raise api_error_from_response(response)
-        log.debug(
-            "DeviceClient.unregister: WDM API delete response status=%s", response.status_code
-        )
+        log.debug("DeviceClient.unregister: WDM API delete response status=%s", response.status_code)
         async with self._lock:
             self._device = None
             self._registered = False

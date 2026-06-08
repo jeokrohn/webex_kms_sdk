@@ -111,8 +111,7 @@ class CoreHTTPClient:
             # Issue the request with merged authentication headers.
             request_headers = self.auth_headers(headers)
             log.debug(
-                "CoreHTTPClient.request_url: send API request method=%s url=%s "
-                "attempt=%s params=%s json=%s headers=%s",
+                "CoreHTTPClient.request_url: send API request method=%s url=%s attempt=%s params=%s json=%s headers=%s",
                 method,
                 url,
                 attempt + 1,
@@ -128,8 +127,7 @@ class CoreHTTPClient:
                 headers=request_headers,
             )
             log.debug(
-                "CoreHTTPClient.request_url: receive API response method=%s url=%s "
-                "attempt=%s status=%s response=%s",
+                "CoreHTTPClient.request_url: receive API response method=%s url=%s attempt=%s status=%s response=%s",
                 method,
                 url,
                 attempt + 1,
@@ -143,8 +141,7 @@ class CoreHTTPClient:
             # Respect server-directed backoff where available before retrying.
             sleep_for = _retry_delay(response, delay, attempt)
             log.debug(
-                "CoreHTTPClient.request_url: retry API request method=%s url=%s "
-                "attempt=%s delay=%s status=%s",
+                "CoreHTTPClient.request_url: retry API request method=%s url=%s attempt=%s delay=%s status=%s",
                 method,
                 url,
                 attempt + 1,
@@ -220,9 +217,7 @@ def _redact_for_log(value: Any) -> Any:
     """
     if isinstance(value, Mapping):
         return {
-            str(key): "<redacted>"
-            if str(key).lower() in SENSITIVE_LOG_KEYS
-            else _redact_for_log(val)
+            str(key): "<redacted>" if str(key).lower() in SENSITIVE_LOG_KEYS else _redact_for_log(val)
             for key, val in value.items()
         }
     if isinstance(value, list):
@@ -331,7 +326,5 @@ class WebexClient:
 
         if self._conversation is None:
             log.debug("WebexClient.conversation: create conversation client")
-            self._conversation = ConversationClient(
-                self.core, self.config, self.mercury, self.encryption
-            )
+            self._conversation = ConversationClient(self.core, self.config, self.mercury, self.encryption)
         return self._conversation
