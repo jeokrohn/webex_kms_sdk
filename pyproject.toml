@@ -1,6 +1,6 @@
 [project]
 name = "webex-kms-sdk"
-version = "0.2.0"
+version = "0.3.0"
 description = "Async Python SDK slice for Webex Mercury communication and KMS-backed decryption"
 readme = "README.md"
 requires-python = ">=3.11"
